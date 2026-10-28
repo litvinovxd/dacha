@@ -98,4 +98,7 @@ input[type=date] { font-size: 1rem; min-height: 52px; width: 100%; padding: 6px;
 .legend span { display: inline-block; margin-right: 12px; font-size: 0.8rem; }
 .legend i { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: middle; margin-right: 4px; border: 1px solid #333; }
 
+.card ul { margin: 6px 0 0; padding-left: 22px; }
+.card li { margin: 4px 0; }
+
 .back { display: inline-block; min-height: 48px; line-height: 48px; font-size: 1rem; text-decoration: none; }

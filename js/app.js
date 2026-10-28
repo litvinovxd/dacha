@@ -99,7 +99,7 @@ function weekTasks() {
 
 // ---------- Отрисовка ----------
 // Пометки источников вроде «(rg)» нужны Роме в данных, маме на экране — нет
-const esc = s => String(s ?? '').replace(/ ?\((?:rg|sotki|aif|profile|altapress)\)/g, '')
+const esc = s => String(s ?? '').replace(/ ?\([a-z_]+\)/g, '')
   .replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 function taskRow(i) {
@@ -256,6 +256,7 @@ function kultura(id) {
   if (!c) return `<p>Не нашла такую культуру.</p>`;
   let h = `<a class="back" href="#/kultury">← Все культуры</a><h2>${esc(c['название'])}</h2>`;
   if (c['где']) h += `<div class="card">Где: ${esc(c['где'].join(', '))}<br>Как: ${esc(c['способ'] || '')}</div>`;
+  h += cardHtml(id);
   const vs = D.varieties['сорта'].filter(v => v['культура'] === id && v['выбран']);
   if (vs.length) {
     h += `<h3>Сорта</h3>` + vs.map(v => `<div class="card"><b>${esc(v['сорт'])}</b>${v['гибрид_F1'] ? ' F1' : ''}
@@ -267,6 +268,24 @@ function kultura(id) {
   const items = D.calendar['дела'].filter(t => t['культура'] === id).map(t => instance(t, y)).sort((a, b) => a.due - b.due);
   if (items.length) h += `<h3>Дела в ${y}</h3>` + items.map(taskRow).join('');
   if (isRoma() && c['примечание']) h += `<div class="roma">Для Ромы: ${esc(c['примечание'])}</div>`;
+  return h;
+}
+
+// Карточка «как сажать и ухаживать» из data/cards.json
+const CARD_PARTS = [['посев', 'Посев'], ['посадка', 'Посадка'], ['полив', 'Полив'], ['подкормки', 'Подкормки'],
+  ['навоз', 'Навоз'], ['уход', 'Уход'], ['соседи', 'Соседи'], ['вредители_болезни', 'Вредители и болезни']];
+
+function cardHtml(id) {
+  const k = D.cards['карточки'][id];
+  if (!k) return '';
+  let h = `<h3>Как растить</h3>`;
+  for (const [key, title] of CARD_PARTS) {
+    const v = k[key];
+    if (!v) continue;
+    const items = Array.isArray(v) ? v : [v];
+    h += `<div class="card"><b>${title}</b>${items.length > 1
+      ? `<ul>${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : `<p>${esc(items[0])}</p>`}</div>`;
+  }
   return h;
 }
 
@@ -300,7 +319,7 @@ function render() {
 }
 
 async function start() {
-  const files = ['calendar', 'crops', 'varieties', 'zones', 'plan'];
+  const files = ['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards'];
   const got = await Promise.all(files.map(f => fetch(`data/${f}.json`).then(r => r.json())));
   files.forEach((f, n) => { D[f] = got[n]; });
   D.tasks = Object.fromEntries(D.calendar['дела'].map(t => [t.id, t]));
