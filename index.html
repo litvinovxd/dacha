@@ -8,10 +8,15 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <main id="app">
-    <h1>Дачный помощник</h1>
-    <p>Скоро здесь появится план работ на участке.</p>
-  </main>
+  <header class="top"><h1 id="title">Дачный помощник</h1></header>
+  <main id="view"><p>Загружаю…</p></main>
+  <nav class="tabs">
+    <a href="#/" data-tab="home"><span class="ico">🏠</span>Главная</a>
+    <a href="#/uchastok" data-tab="uchastok"><span class="ico">🗺️</span>Участок</a>
+    <a href="#/kalendar" data-tab="kalendar"><span class="ico">📅</span>Календарь</a>
+    <a href="#/kultury" data-tab="kultury"><span class="ico">🌱</span>Культуры</a>
+    <a href="#/eshche" data-tab="eshche"><span class="ico">☰</span>Ещё</a>
+  </nav>
   <script src="js/app.js"></script>
 </body>
 </html>
