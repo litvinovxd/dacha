@@ -1,0 +1,80 @@
+{
+ "_описание": "Правила севооборота и соседства. Основной источник — rg.ru (2026), дополнительный — sotki.ru. Где источники расходятся, указано в «расхождения».",
+ "источники": {
+  "rg": "https://rg.ru/post/sevooborot-na-dache-chto-posle-chego-sazhat-na-griadkah.html (О. Трущалова, «Российская газета», 02.07.2026)",
+  "sotki": "https://www.sotki.ru/sad_ogorod/article/razmeschaem-ovoschi-po-nauke-5122 (17.11.2016)",
+  "теплица": [
+   "https://profile.ru/news/society/osennyaya-zamena-grunta-v-teplice-kak-chasto-nuzhno-eto-delat-i-zachem-a999-1600699/amp/",
+   "https://www.sotki.ru/obmen_opitom/article/kak-dezinficirovat-teplicu-4250",
+   "https://aif.ru/dacha/sadovod-tumanov-rasskazal-kak-vosstanovit-pochvu-posle-sbora-tomatov",
+   "https://peterburg2.ru/news/kak-pravilno-podgotovit-teplicu-k-zime-i-izbezhat-problem-vesnoy-187449.html"
+  ]
+ },
+ "семейства": {
+  "паслёновые": ["tomat", "perets", "baklazhan", "kartofel"],
+  "тыквенные": ["ogurets", "kabachok", "tykva", "arbuz"],
+  "капустные": ["kapusta", "kapusta-tsvetnaya", "kapusta-brokkoli", "redis"],
+  "зонтичные": ["morkov", "ukrop", "petrushka"],
+  "амарантовые": ["svekla", "shpinat"],
+  "луковые": ["luk", "luk-batun", "chesnok"],
+  "бобовые": ["goroh", "fasol"],
+  "астровые": ["salat"],
+  "злаки": ["kukuruza"]
+ },
+ "не_возвращать_лет": {
+  "_правило": "Культуры одного семейства не сажать на то же место раньше, чем через указанное число лет (rg).",
+  "паслёновые": 3, "тыквенные": 3, "капустные": 3, "зонтичные": 3, "амарантовые": 3, "луковые": 3,
+  "бобовые": 2, "астровые": 2, "злаки": 2,
+  "исключения": {
+   "капустные_при_киле": 7,
+   "томат_перец_баклажан": "допустимо 2 года подряд на одном месте, не больше (sotki)",
+   "огурец": "на следующий год на то же место не сеять (sotki)"
+  }
+ },
+ "после_чего": {
+  "_правило": "Для каждой культуры: после чего хорошо и после чего плохо её сажать (rg, кроме отмеченного).",
+  "tomat": {"хорошо": ["luk", "chesnok", "morkov", "svekla", "goroh", "fasol", "зелень"], "плохо": ["kartofel", "perets", "baklazhan"]},
+  "perets": {"хорошо": ["luk", "chesnok", "morkov", "svekla", "goroh", "fasol", "зелень"], "плохо": ["kartofel", "tomat", "baklazhan"], "примечание": "в rg отдельно не разобран — правила по семейству паслёновых"},
+  "baklazhan": {"хорошо": ["luk", "chesnok", "morkov", "svekla", "goroh", "fasol", "зелень"], "плохо": ["kartofel", "tomat", "perets"], "примечание": "как у перца"},
+  "ogurets": {"хорошо": ["tomat", "perets", "morkov", "svekla", "luk", "chesnok", "kapusta"], "плохо": ["kabachok", "tykva", "arbuz", "ogurets"]},
+  "kabachok": {"хорошо": ["kartofel", "kapusta", "goroh", "fasol"], "плохо": ["ogurets", "tykva", "arbuz", "kabachok"]},
+  "tykva": {"хорошо": ["kartofel", "kapusta", "goroh", "fasol"], "плохо": ["ogurets", "kabachok", "arbuz", "tykva"]},
+  "arbuz": {"хорошо": ["kartofel", "kapusta", "goroh", "fasol"], "плохо": ["ogurets", "kabachok", "tykva", "arbuz"], "примечание": "как у тыквенных"},
+  "kapusta": {"хорошо": ["kartofel", "tomat", "perets", "morkov", "svekla", "goroh", "fasol", "luk", "chesnok"], "плохо": ["redis", "kapusta", "kukuruza", "ogurets"], "примечание": "кукуруза и огурец как плохие — по sotki"},
+  "kartofel": {"хорошо": ["goroh", "fasol", "kapusta", "luk", "morkov", "svekla", "зелень", "ogurets", "kabachok", "tykva"], "плохо": ["tomat", "perets", "baklazhan", "kartofel"]},
+  "morkov": {"хорошо": ["luk", "chesnok", "kapusta", "goroh", "fasol", "tomat"], "плохо": ["morkov", "svekla", "petrushka"]},
+  "svekla": {"хорошо": ["luk", "chesnok", "kapusta", "goroh", "fasol", "tomat"], "плохо": ["morkov", "svekla", "petrushka", "shpinat"]},
+  "luk": {"хорошо": ["morkov", "svekla", "kapusta", "tomat", "ogurets"], "плохо": ["luk", "chesnok"]},
+  "chesnok": {"хорошо": ["morkov", "svekla", "kapusta", "tomat", "ogurets"], "плохо": ["luk", "chesnok"]},
+  "goroh": {"хорошо": ["kapusta", "kartofel", "tomat", "ogurets", "perets"], "плохо": ["goroh", "fasol"]},
+  "fasol": {"хорошо": ["kapusta", "kartofel", "tomat", "ogurets", "perets"], "плохо": ["goroh", "fasol"]},
+  "зелень": {"хорошо": ["любые"], "плохо": ["та же зелень"], "примечание": "после зелени можно сажать любые культуры"}
+ },
+ "расхождения": [
+  "Огурец после томата: rg — хорошо, sotki — плохо. Взято по rg (новее), но при выборе лучше ставить огурец после лука, чеснока, капусты или корнеплодов.",
+  "Лук после капусты, моркови, томатов: rg — хорошо, одна таблица из поиска (vikna.tv) — нельзя. Взято по rg."
+ ],
+ "соседи": {
+  "хорошо": [
+   {"кто": ["morkov", "luk"], "почему": "запах лука отпугивает морковную муху, морковь — луковую (rg)"}
+  ],
+  "плохо": [
+   {"кто": ["ogurets", "kabachok", "tykva"], "почему": "заражают друг друга болезнями (rg)"}
+  ],
+  "требования": [
+   "Томатам, перцам и баклажанам нужно не меньше 8 часов солнца в день (rg).",
+   "Огурцы и капуста любят влагу — ближе к воде; лук и чеснок не любят переувлажнения (rg)."
+  ]
+ },
+ "теплица": {
+  "_почему": "В одной теплице каждый год растут паслёновые — настоящий севооборот невозможен, поэтому вместо него: сидераты, замена грунта, обеззараживание.",
+  "советы": [
+   "Каждую осень: убрать все остатки растений, вымыть и обеззаразить каркас и стенки (sotki).",
+   "Сидераты после сбора урожая: белая горчица после томатов подавляет болезни (aif); также фацелия, рапс (profile).",
+   "Менять верхний слой грунта 10–12 см (sotki) раз в 2–3 года (profile); при сильных болезнях — глубже, до 30 см (altapress).",
+   "Огурцы держать отдельно от томатов — в парниках: им нужна высокая влажность, томатам — сухой воздух.",
+   "Внутри теплицы чередовать короба: где был томат — на следующий год перец или баклажан нежелательны (одно семейство), поэтому лучше менять местами томаты и огурцы, если огурцы садят в теплицу."
+  ],
+  "наш_климат": "Осенние заморозки с середины сентября, поэтому сидераты в теплице сеять сразу после уборки (конец августа — начало сентября): в открытом грунте в октябре они уже не вырастут. Это мой вывод из CLIMATE.md, не из источников."
+ }
+}
