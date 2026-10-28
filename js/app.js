@@ -20,7 +20,6 @@ function save(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* без хранилища просто не запомним */ }
 }
 let done = load('dacha.done', {});   // "2027:tomat-t-posev" -> "2027-03-07"
-const isRoma = () => load('dacha.roma', false);
 
 // ---------- Даты ----------
 // Для проверки можно открыть страницу с ?date=2027-03-08
@@ -233,7 +232,6 @@ function delo(year, id) {
     <div class="card"><label>Сделала в другой день:<br><input type="date" id="otherDay" value="${iso(today())}"></label>
     <button class="second" data-mark="other">Сохранить этот день</button></div>`;
   if (i.last) h += `<button class="second" data-mark="undo">Снять отметку</button>`;
-  if (isRoma() && task['проверено'] === false) h += `<div class="roma">Для Ромы: срок этого дела без надёжного источника — уточнить.</div>`;
   setTimeout(() => view.querySelectorAll('[data-mark]').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.mark === 'undo') delete done[i.key];
     else done[i.key] = b.dataset.mark === 'today' ? iso(today()) : document.getElementById('otherDay').value;
@@ -244,36 +242,121 @@ function delo(year, id) {
 }
 
 // --- Участок ---
-const ZONE_FILL = { 'дом': '#c0504d', 'теплица': '#cfe3f0', 'парник': '#e6f2fa', 'огород': '#b98b5e', 'клумба': '#f2b8d0', 'ягодник': '#7fb27a', 'план': '#e9c46a' };
+// Схема участка: рисованный план, повёрнут длинной стороной вертикально (под экран телефона)
+const ZONE_LOOK = {   // заливка на схеме и цвет метки в списке
+  'дом': { fill: '#b5483f', chip: '#b5483f' }, 'теплица': { fill: 'url(#glass)', chip: '#9ccbe3' },
+  'парник': { fill: 'url(#hoops)', chip: '#e8ece4' }, 'огород': { fill: 'url(#soil)', chip: '#8b5e3c' },
+  'клумба': { fill: '#9fcf7f', chip: '#e66a9a' }, 'ягодник': { fill: '#8dbb6e', chip: '#5d8f4a' },
+  'план': { fill: 'url(#plan)', chip: '#d9467a' },
+};
+const SHORT = { dom: 'Дом', klumba: 'Цветник', teplitsa: 'Теплица', 'ogorod-bolshoy-verh': 'Огород, верх',
+  'ogorod-bolshoy-niz': 'Огород, низ', 'ogorod-vtoroy': 'Второй огород', 'sliva-zhimolost': 'Слива, жимолость' };
+// сдвиг подписи на схеме (в метрах: вправо, вверх), чтобы не наезжала на соседей
+const LABEL_SHIFT = { teplitsa: [0, 4], 'ogorod-bolshoy-verh': [-2.5, 1.5], klumba: [0, 2.6] };
 
 function mapSvg(activeId) {
-  const zs = D.zones['зоны'];
-  const pts = zs.flatMap(z => z['контур_м']);
-  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
-  const minx = Math.min(...xs) - 2, maxx = Math.max(...xs) + 2, miny = Math.min(...ys) - 2, maxy = Math.max(...ys) + 2;
+  const Z = D.zones, zs = Z['зоны'];
+  const th = Z['поворот_схемы_град'] * Math.PI / 180, c = Math.cos(th), s = Math.sin(th);
+  const R = ([x, y]) => [x * c - y * s, x * s + y * c];   // поворот плана
+  const border = Z['граница_м'].map(R);
+  const xs = border.map(p => p[0]), ys = border.map(p => p[1]);
+  const minx = Math.min(...xs) - 3, maxx = Math.max(...xs) + 3, miny = Math.min(...ys) - 3, maxy = Math.max(...ys) + 3;
   const S = 10, W = (maxx - minx) * S, H = (maxy - miny) * S;
-  const X = x => ((x - minx) * S).toFixed(0), Y = y => ((maxy - y) * S).toFixed(0);
-  let s = `<svg class="map" viewBox="0 0 ${W.toFixed(0)} ${H.toFixed(0)}" xmlns="http://www.w3.org/2000/svg">`;
-  zs.forEach((z, n) => {
-    const p = z['контур_м'].map(q => `${X(q[0])},${Y(q[1])}`).join(' ');
-    const on = z.id === activeId;
-    s += `<a href="#/zona/${z.id}" class="zone"><polygon points="${p}" fill="${ZONE_FILL[z['тип']] || '#ddd'}"
-      stroke="${on ? '#d00' : '#333'}" stroke-width="${on ? 6 : 2}"/></a>`;
+  const X = x => ((x - minx) * S).toFixed(1), Y = y => ((maxy - y) * S).toFixed(1);
+  const pts = poly => poly.map(R).map(([x, y]) => `${X(x)},${Y(y)}`).join(' ');
+  const center = poly => {   // центр тяжести площади — для неровных огородов точнее среднего по углам
+    const q = poly.map(R);
+    let A = 0, cx = 0, cy = 0;
+    q.forEach((p, i) => {
+      const n = q[(i + 1) % q.length], k = p[0] * n[1] - n[0] * p[1];
+      A += k; cx += (p[0] + n[0]) * k; cy += (p[1] + n[1]) * k;
+    });
+    return A ? [cx / (3 * A), cy / (3 * A)] : q[0];
+  };
+  // направление грядок на экране — по нему идут борозды и дуги парников
+  const az = (Z['азимут_грядок'] || 130) * Math.PI / 180;
+  const [bx, by] = R([Math.sin(az), Math.cos(az)]);
+  const rowAngle = Math.atan2(-by, bx) * 180 / Math.PI;
+
+  let o = `<svg class="map" viewBox="0 0 ${W.toFixed(0)} ${H.toFixed(0)}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Схема участка">
+  <defs>
+    <pattern id="soil" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(${rowAngle.toFixed(1)})">
+      <rect width="14" height="14" fill="#9a6b45"/><rect y="9" width="14" height="5" fill="#7d5233"/></pattern>
+    <pattern id="glass" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(${rowAngle.toFixed(1)})">
+      <rect width="18" height="18" fill="#d6ecf7"/><rect width="18" height="2" fill="#a9d0e6"/><rect width="2" height="18" fill="#bfdcec"/></pattern>
+    <pattern id="hoops" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(${(rowAngle + 90).toFixed(1)})">
+      <rect width="10" height="10" fill="#f6f8f3"/><rect width="3" height="10" fill="#d5ddd2"/></pattern>
+    <pattern id="plan" width="12" height="12" patternUnits="userSpaceOnUse">
+      <rect width="12" height="12" fill="#f7d6e2"/><circle cx="6" cy="6" r="2.4" fill="#d9467a"/></pattern>
+    <radialGradient id="crown"><stop offset="0" stop-color="#5f9a4f"/><stop offset="1" stop-color="#2f5a2c"/></radialGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%"><feDropShadow dx="2" dy="3" stdDeviation="2" flood-opacity=".25"/></filter>
+  </defs>
+  <rect width="100%" height="100%" fill="#c9dcae"/>
+  <polygon points="${border.map(([x, y]) => `${X(x)},${Y(y)}`).join(' ')}" fill="#dde9c8" stroke="#8a6b44" stroke-width="4" stroke-dasharray="14 7"/>`;
+
+  for (const [tx, ty, r] of Z['деревья_м']) {   // лес и крупные деревья
+    const [x, y] = R([tx, ty]);
+    o += `<circle cx="${X(x)}" cy="${Y(y)}" r="${(r * S).toFixed(0)}" fill="url(#crown)" opacity=".85"/>`;
+  }
+
+  zs.forEach(z => {
+    const look = ZONE_LOOK[z['тип']] || { fill: '#ddd' };
+    const on = z.id === activeId, plan = z['тип'] === 'план';
+    o += `<a href="#/zona/${z.id}" class="zone"><polygon points="${pts(z['контур_м'])}" fill="${look.fill}"
+      stroke="${on ? '#ff7a00' : plan ? '#d9467a' : '#4a3a28'}" stroke-width="${on ? 7 : 2.5}"
+      ${plan ? 'stroke-dasharray="8 5"' : ''} filter="url(#shadow)"/>`;
+    const [cx, cy] = center(z['контур_м']);
+    if (z['тип'] === 'дом') {   // конёк крыши
+      const q = z['контур_м'].map(R);
+      const m1 = [(q[0][0] + q[1][0]) / 2, (q[0][1] + q[1][1]) / 2], m2 = [(q[2][0] + q[3][0]) / 2, (q[2][1] + q[3][1]) / 2];
+      o += `<line x1="${X(m1[0])}" y1="${Y(m1[1])}" x2="${X(m2[0])}" y2="${Y(m2[1])}" stroke="#7e2b25" stroke-width="4"/>`;
+    }
+    if (z['тип'] === 'клумба') {   // клумбы-покрышки двумя полукругами
+      const colors = ['#e66a9a', '#f2c230', '#c75bd6', '#f08a3c'];
+      for (let k = 0; k < 12; k++) {
+        const ang = Math.PI * (k % 6) / 5, ring = k < 6 ? 2.8 : 1.5;
+        const px = cx + ring * Math.cos(ang), py = cy - 1.5 + ring * Math.sin(ang);
+        o += `<circle cx="${X(px)}" cy="${Y(py)}" r="6" fill="${colors[k % 4]}" stroke="#333" stroke-width="3"/>`;
+      }
+    }
+    if (z['тип'] === 'ягодник') {   // кусты
+      for (const [dx, dy] of [[-3, 1], [0, 3], [3, -1], [-1, -3], [2, 2.5], [-3.5, -1.5]]) {
+        o += `<circle cx="${X(cx + dx)}" cy="${Y(cy + dy)}" r="14" fill="#4f8a3e" stroke="#2f5a2c" stroke-width="2"/>`;
+      }
+    }
+    o += `</a>`;
   });
+
+  // подписи: крупным местам — название, мелким — номер в кружке (как в списке под схемой)
   zs.forEach((z, n) => {
-    const c = z['контур_м'];
-    const cx = c.reduce((a, q) => a + q[0], 0) / c.length, cy = c.reduce((a, q) => a + q[1], 0) / c.length;
-    s += `<text x="${X(cx)}" y="${Y(cy)}" font-size="22" font-weight="700" text-anchor="middle" dominant-baseline="middle"
-      stroke="#fff" stroke-width="5" paint-order="stroke" pointer-events="none">${n + 1}</text>`;
+    const [cx, cy] = center(z['контур_м']);
+    if (SHORT[z.id]) {
+      const [sx, sy] = LABEL_SHIFT[z.id] || [0, 0];
+      o += `<text x="${X(cx + sx)}" y="${Y(cy + sy)}" font-size="26" font-weight="700" text-anchor="middle"
+        dominant-baseline="middle" fill="#1d1d1d" stroke="#fff" stroke-width="6" stroke-linejoin="round" paint-order="stroke"
+        pointer-events="none">${SHORT[z.id]}</text>`;
+    } else {
+      o += `<g pointer-events="none"><circle cx="${X(cx)}" cy="${Y(cy)}" r="12" fill="#fff" stroke="#333" stroke-width="2"/>
+        <text x="${X(cx)}" y="${Y(cy)}" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central">${n + 1}</text></g>`;
+    }
   });
-  s += `<text x="${W - 30}" y="40" font-size="30" text-anchor="middle">С↑</text></svg>`;
-  return s;
+
+  // стрелка на север
+  const [nx, ny] = R([0, 1]);
+  const rot = Math.atan2(nx, ny) * 180 / Math.PI;
+  o += `<g transform="translate(${(W - 46).toFixed(0)} 52)"><circle r="32" fill="#fff" opacity=".92"/>
+    <g transform="rotate(${rot.toFixed(1)})"><path d="M0 -26 L11 8 L0 2 L-11 8 Z" fill="#b5483f"/></g>
+    <text y="27" font-size="15" font-weight="700" text-anchor="middle">север</text></g>`;
+  return o + `</svg>`;
 }
 
 function uchastok() {
-  let h = `<p class="note">Нажмите на участок на схеме или на название в списке.</p>${mapSvg()}`;
-  h += `<div class="zlist">` + D.zones['зоны'].map((z, n) =>
-    `<a href="#/zona/${z.id}"><span class="num">${n + 1}</span>${esc(z['название'])}</a>`).join('') + `</div>`;
+  let h = `<h2>Участок</h2>${mapSvg()}<p class="note">Нажмите на место на схеме или выберите в списке.</p>`;
+  h += `<div class="zlist">` + D.zones['зоны'].map((z, n) => {
+    const look = ZONE_LOOK[z['тип']] || {};
+    const dark = ['дом', 'огород', 'ягодник', 'план'].includes(z['тип']);
+    return `<a href="#/zona/${z.id}"><span class="num" style="background:${look.chip || '#fff'};color:${dark ? '#fff' : '#111'}">${n + 1}</span>${esc(z['название'])}</a>`;
+  }).join('') + `</div>`;
   return h;
 }
 
@@ -313,7 +396,6 @@ function zona(id) {
   for (const [y, list] of Object.entries(fromDiary)) hist.push([y, list.join(', ') + ' (из дневника)']);
   hist.sort((p, q) => q[0].localeCompare(p[0]));
   if (hist.length) h += `<h3>Что росло раньше</h3>` + hist.map(([y, t]) => `<p><b>${y}:</b> ${esc(t)}</p>`).join('');
-  if (isRoma() && !z['проверено']) h += `<div class="roma">Для Ромы: ${esc(z['откуда_размер'])}</div>`;
   return h;
 }
 
@@ -339,7 +421,6 @@ function kultura(id) {
   const y = seasonYear();
   const items = D.calendar['дела'].filter(t => t['культура'] === id).map(t => instance(t, y)).sort((a, b) => a.due - b.due);
   if (items.length) h += `<h3>Дела в ${y}</h3>` + items.map(taskRow).join('');
-  if (isRoma() && c['примечание']) h += `<div class="roma">Для Ромы: ${esc(c['примечание'])}</div>`;
   return h;
 }
 
@@ -421,7 +502,6 @@ function pokupki() {
   if (got.length) h += `<h2>Уже есть</h2>` + got.map(shopRow).join('');
   const m = D.shopping['магазин'];
   h += `<p class="note">Магазин: <a href="${esc(m['сайт'])}" target="_blank" rel="noopener">${esc(m['название'])}</a>, семена — заказ от ${m['минимальный_заказ_семян_руб']} ₽.</p>`;
-  if (isRoma()) h += `<div class="roma">Для Ромы: срок почтовой доставки (42 дня) — допущение, уточнить у мамы.</div>`;
   return h;
 }
 
@@ -446,7 +526,6 @@ function priznak(id) {
   let h = `<a class="back" href="javascript:history.back()">← Назад</a><h2>${p['значок']} ${esc(p['что_видно'])}</h2>
     <div class="card"><b>Что это, скорее всего</b><p>${esc(p['что_это'])}</p></div>
     <div class="card"><b>Что делать</b><ul>${p['что_делать'].map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`;
-  if (isRoma()) h += `<div class="roma">Источник: ${esc(p['источник'])}${p['проверено'] === false ? ' — не проверено' : ''}</div>`;
   return h;
 }
 
@@ -502,26 +581,6 @@ function bindPush() {
     const reg = await navigator.serviceWorker.ready;
     reg.showNotification('Дачный помощник', { body: 'Так будут выглядеть предупреждения о погоде', icon: 'img/icon-192.png' });
   };
-}
-
-// Пороги погоды (для Ромы)
-const TH = [['заморозок_ночью_до', 'Заморозок: ночью не теплее, °C'], ['жара_днём_от', 'Жара: днём от, °C'],
-  ['ливень_мм_от', 'Ливень: от, мм в день'], ['фитофтора_ночь_до', 'Фитофтора: ночи не теплее, °C']];
-
-function thresholdsBlock() {
-  const P = weatherCfg()['пороги'];
-  return `<h3>Пороги погоды</h3>` + TH.map(([k, label]) =>
-    `<label class="card" style="display:block">${label}<br><input type="number" data-th="${k}" value="${P[k]}"
-      style="font-size:1rem;min-height:48px;width:100%"></label>`).join('') +
-    `<p class="note">Меняются только на этом телефоне. Для уведомлений — поменять в data/weather.json.</p>`;
-}
-
-function bindThresholds() {
-  view.querySelectorAll('[data-th]').forEach(inp => inp.addEventListener('change', () => {
-    const own = load('dacha.weatherCfg', {});
-    own[inp.dataset.th] = Number(inp.value);
-    save('dacha.weatherCfg', own);
-  }));
 }
 
 // --- Дневник ---
@@ -689,7 +748,6 @@ function bindBackup() {
 
 // --- Ещё ---
 function eshche() {
-  const roma = isRoma();
   return `<a class="btn" href="#/dnevnik">📖 Дневник</a>
     <a class="btn" href="#/pokupki">🛒 Покупки</a>
     <a class="btn" href="#/chto">🔍 Что с растением?</a>
@@ -704,10 +762,7 @@ function eshche() {
     ${pushBlock()}
     <h2>Настройки</h2>
     <button class="second" id="moonBtn">🌙 ${load('dacha.moon', false) ? 'Выключить' : 'Включить'} лунный календарь</button>
-    <p class="note">Народная традиция: на главной будет фаза Луны и подсказка.</p>
-    <button class="second" id="romaBtn">${roma ? 'Выключить' : 'Включить'} режим для Ромы</button>
-    <p class="note">В режиме для Ромы видны пометки о допущениях и непроверенных сроках.</p>
-    ${roma ? thresholdsBlock() : ''}`;
+    <p class="note">Народная традиция: на главной будет фаза Луны и подсказка.</p>`;
 }
 
 // ---------- Маршруты ----------
@@ -729,11 +784,8 @@ function render() {
     render();
   }));
   bindPush();
-  bindThresholds();
   bindDiary(a);
   bindBackup();
-  const rb = document.getElementById('romaBtn');
-  if (rb) rb.onclick = () => { save('dacha.roma', !isRoma()); render(); };
   const mb = document.getElementById('moonBtn');
   if (mb) mb.onclick = () => { save('dacha.moon', !load('dacha.moon', false)); render(); };
   window.scrollTo(0, 0);

@@ -143,6 +143,17 @@ for z in SRC["зоны"]:
         "проверено": z.get("проверено", False),
     })
 
+BORDER = [to_m(*p) for p in SRC["граница_px"]]
+
+# Поворот схемы для телефона: длинную сторону участка ставим вертикально
+_mx = sum(p[0] for p in BORDER) / len(BORDER)
+_my = sum(p[1] for p in BORDER) / len(BORDER)
+_sxx = sum((p[0] - _mx) ** 2 for p in BORDER)
+_syy = sum((p[1] - _my) ** 2 for p in BORDER)
+_sxy = sum((p[0] - _mx) * (p[1] - _my) for p in BORDER)
+AXIS = math.degrees(0.5 * math.atan2(2 * _sxy, _sxx - _syy))  # угол длинной оси от направления «на восток»
+TURN = SRC.get("поворот_схемы_град", round(AXIS - 90, 1))       # против часовой (минус — по часовой); дом — наверх
+
 (ROOT / "data" / "zones.json").write_text(json.dumps({
     "_описание": "Зоны участка. Контуры в метрах (x — на восток, y — на север, 0 — условная точка в центре участка). "
                  "Часы солнца — расчёт тени от деревьев по положению солнца на 15-е число месяца; высота деревьев — допущение. "
@@ -150,12 +161,14 @@ for z in SRC["зоны"]:
     "высота_деревьев_м_допущение": SRC["высота_деревьев_м"],
     "зоны": zones,
     "деревья_м": [[round(x, 1), round(y, 1), round(r, 1)] for x, y, r, _ in TREES],
+    "граница_м": [[round(x, 2), round(y, 2)] for x, y in BORDER],
+    "поворот_схемы_град": TURN,
+    "азимут_грядок": SRC["азимут_грядок"],
 }, ensure_ascii=False, indent=1), encoding="utf-8")
 
 # --- Схема ---
 COLORS = {"солнце": "#f6d743", "полутень": "#9fc97a", "тень": "#5f8f6b", None: "#d9d4cc"}
 TYPE_FILL = {"дом": "#c0504d", "постройка": "#b9b2a6"}
-BORDER = [to_m(*p) for p in SRC["граница_px"]]
 allx = [p[0] for p in BORDER]
 ally = [p[1] for p in BORDER]
 minx, maxx, miny, maxy = min(allx) - 2, max(allx) + 2, min(ally) - 2, max(ally) + 2
