@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вариант А — спокойный зелёный</title>
+<style>
+  /* Вариант А: тёплый кремовый фон, мягкие карточки, зелёный акцент */
+  :root { --bg:#f6f1e7; --card:#fffdf8; --ink:#1f2a1f; --muted:#5f6b5c; --green:#2f6b3a; --green-soft:#e3eedd; --warn:#a3341f; --warn-soft:#fbe3d6; --line:#e4dccb; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:20px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; padding-bottom:96px; }
+  header { padding:22px 18px 6px; }
+  header .date { color:var(--muted); font-size:.85rem; }
+  header h1 { margin:2px 0 0; font-size:1.55rem; font-family:Georgia,"Times New Roman",serif; color:var(--green); }
+  main { padding:6px 16px; max-width:560px; margin:0 auto; }
+  .alert { display:flex; gap:12px; align-items:flex-start; background:var(--warn-soft); border-radius:18px; padding:14px 16px; margin:10px 0 18px; color:var(--warn); font-weight:600; }
+  .alert .i { font-size:1.6rem; line-height:1; }
+  h2 { font-family:Georgia,serif; font-size:1.2rem; margin:18px 4px 10px; font-weight:700; }
+  .task { display:flex; gap:14px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:14px; margin:10px 0; box-shadow:0 1px 0 rgba(0,0,0,.03); }
+  .box { flex:none; width:44px; height:44px; border-radius:50%; border:3px solid var(--green); }
+  .task.done .box { background:var(--green); position:relative; }
+  .task.done .box::after { content:"✓"; color:#fff; position:absolute; inset:0; display:grid; place-items:center; font-weight:700; }
+  .task.done .t { text-decoration:line-through; color:var(--muted); }
+  .when { color:var(--muted); font-size:.82rem; }
+  .shop { display:flex; justify-content:space-between; align-items:center; background:var(--green-soft); border-radius:18px; padding:16px; margin:16px 0; color:var(--green); font-weight:600; text-decoration:none; }
+  .wx { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .day { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:10px 6px; text-align:center; }
+  .day .d { font-size:.75rem; color:var(--muted); }
+  .day .e { font-size:1.6rem; }
+  .day .n { font-size:.8rem; color:#2a5d9c; }
+  .day .x { font-weight:700; }
+  nav { position:fixed; left:0; right:0; bottom:0; display:flex; background:var(--card); border-top:1px solid var(--line); padding:6px 4px calc(6px + env(safe-area-inset-bottom)); }
+  nav a { flex:1; text-align:center; text-decoration:none; color:var(--muted); font-size:.68rem; padding:6px 0; border-radius:14px; }
+  nav a span { display:block; font-size:1.35rem; }
+  nav a.on { color:var(--green); font-weight:700; background:var(--green-soft); }
+</style>
+</head>
+<body>
+<header><div class="date">Среда, 19 мая</div><h1>Дачный помощник</h1></header>
+<main>
+  <div class="alert"><span class="i">❄️</span><div>Завтра ночью до +1°: заморозок.<br>Укрой рассаду и закрой теплицу.</div></div>
+
+  <h2>На этой неделе</h2>
+  <div class="task"><span class="box"></span><div><div class="t">Высадить томаты в теплицу</div><div class="when">20–25 мая</div></div></div>
+  <div class="task"><span class="box"></span><div><div class="t">Высадить перцы в теплицу</div><div class="when">20–25 мая</div></div></div>
+  <div class="task"><span class="box"></span><div><div class="t">Посадить картофель</div><div class="when">15–25 мая</div></div></div>
+  <div class="task done"><span class="box"></span><div><div class="t">Посеять морковь</div><div class="when">сделано 16 мая</div></div></div>
+
+  <a class="shop" href="#">🛒 Пора купить: 2 вещи <span>›</span></a>
+
+  <h2>Погода</h2>
+  <div class="wx">
+    <div class="day"><div class="d">Сегодня</div><div class="e">⛅</div><div class="x">+17°</div><div class="n">ночью +5°</div></div>
+    <div class="day"><div class="d">Завтра</div><div class="e">☀️</div><div class="x">+14°</div><div class="n">ночью +1°</div></div>
+    <div class="day"><div class="d">Пт</div><div class="e">🌧️</div><div class="x">+12°</div><div class="n">ночью +4°</div></div>
+    <div class="day"><div class="d">Сб</div><div class="e">☀️</div><div class="x">+19°</div><div class="n">ночью +7°</div></div>
+  </div>
+</main>
+<nav>
+  <a class="on" href="#"><span>🏠</span>Главная</a><a href="#"><span>🗺️</span>Участок</a><a href="#"><span>📅</span>Календарь</a><a href="#"><span>🌱</span>Культуры</a><a href="#"><span>☰</span>Ещё</a>
+</nav>
+</body>
+</html>
