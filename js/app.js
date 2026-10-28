@@ -124,6 +124,21 @@ function bindChecks() {
   }));
 }
 
+// --- Лунный календарь (по желанию, по умолчанию выключен) ---
+// Всегда ниже погоды и дел: сроки по климату и предупреждения важнее.
+const MOON_TIP = {
+  'растущая': 'хорошо сеять и сажать то, что растёт над землёй: томаты, перцы, огурцы, зелень',
+  'убывающая': 'хорошо сажать корнеплоды и клубни: картофель, морковь, свёклу, лук',
+};
+
+function moonBlock() {
+  const t = today();
+  const p = Moon.phase(t.getFullYear(), t.getMonth() + 1, t.getDate());
+  const icon = { 'новолуние': '🌑', 'растущая': '🌒', 'полнолуние': '🌕', 'убывающая': '🌘' }[p.name];
+  return `<div class="card">${icon} <b>Луна: ${p.name}</b>${MOON_TIP[p.name] ? ` — по народной традиции ${MOON_TIP[p.name]}.` : '.'}
+    <p class="note">Народная традиция, наукой не подтверждена. Погода и сроки в календаре важнее.</p></div>`;
+}
+
 // --- Погода ---
 const WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
 let forecast = load('dacha.forecast', null);   // { got: ISO-время, daily: {...} }
@@ -145,11 +160,17 @@ async function loadForecast() {
   } catch (e) { /* нет интернета — покажем сохранённый прогноз */ }
 }
 
+// Предупреждения — наверху главной, таблица прогноза — внизу
+function weatherAlerts() {
+  if (!forecast) return '';
+  return Weather.hints(forecast.daily, weatherCfg(), iso(today()))
+    .map(x => `<div class="alert${x['важно'] ? '' : ' soft'}">${esc(x['текст'])}</div>`).join('');
+}
+
 function weatherBlock() {
   if (!forecast) return `<p class="note">Прогноз погоды загружается…</p>`;
   const d = forecast.daily, t = iso(today());
-  const hs = Weather.hints(d, weatherCfg(), t);
-  let h = hs.map(x => `<div class="alert${x['важно'] ? '' : ' soft'}">${esc(x['текст'])}</div>`).join('');
+  let h = '';
   const i0 = Math.max(0, d.time.indexOf(t));
   h += `<div class="wx">` + d.time.slice(i0, i0 + 7).map((day, k) => {
     const i = i0 + k, dt = parse(day);
@@ -164,13 +185,15 @@ function weatherBlock() {
 
 function home() {
   const { now, soon } = weekTasks();
-  let h = `<h2>Погода</h2>${weatherBlock()}<h2>На этой неделе</h2>`;
+  let h = `${weatherAlerts()}<h2>На этой неделе</h2>`;
   h += now.length ? now.map(taskRow).join('') : `<p class="empty">На этой неделе дел по календарю нет.</p>`;
   if (soon.length) h += `<h2>Скоро</h2>` + soon.map(taskRow).join('');
   const toBuy = shopItems(shopYear()).filter(i => !i.has && i.order <= addDays(today(), 14));
   if (toBuy.length) h += `<a class="btn second" href="#/pokupki">🛒 Пора купить или заказать: ${toBuy.length}</a>`;
+  if (load('dacha.moon', false)) h += moonBlock();
   h += `<p class="note">Нажмите на дело, чтобы прочитать, как его сделать. Квадратик — отметить «Сделано».</p>
-    <a class="btn second" href="#/dnevnik">📖 Записать в дневник</a>`;
+    <a class="btn second" href="#/dnevnik">📖 Записать в дневник</a>
+    <h2>Погода на неделю</h2>${weatherBlock()}`;
   return h;
 }
 
@@ -550,7 +573,7 @@ function zoneName(id) { const z = D.zones['зоны'].find(q => q.id === id); re
 function cropName(id) { return D.crops[id] ? D.crops[id]['название'] : ''; }
 
 function dnevnik() {
-  let h = `<h2>Дневник</h2><div style="display:flex;gap:8px">` +
+  let h = `<h2>Дневник</h2><div class="row">` +
     Object.entries(KINDS).map(([k, t]) => `<a class="btn" style="font-size:0.85rem;padding:0 4px" href="#/zapis/${k}">${t}</a>`).join('') + `</div>`;
   const last = load('dacha.backupAt', null);
   if (diary.length && (!last || Date.now() - new Date(last).getTime() > BACKUP_DAYS * DAY)) {
@@ -578,7 +601,7 @@ function zapis(kind) {
     <label class="card" style="display:block">Сорт<input id="fVar" list="varList" class="big" placeholder="можно не заполнять"><datalist id="varList"></datalist></label>
     <label class="card" style="display:block">Где<select id="fZone" class="big"><option value="">—</option>${opt(zones)}</select></label>`;
   if (kind === 'urozhay') {
-    h += `<div class="card">Сколько<div style="display:flex;gap:6px">${HARVEST.map(x =>
+    h += `<div class="card">Сколько<div class="row">${HARVEST.map(x =>
       `<button class="second" data-harv="${x}" style="font-size:0.9rem">${x}</button>`).join('')}</div>
       <label>или в килограммах<input type="number" id="fKg" class="big" inputmode="decimal"></label></div>`;
   }
@@ -677,6 +700,8 @@ function eshche() {
     <h2>Предупреждения о погоде</h2>
     ${pushBlock()}
     <h2>Настройки</h2>
+    <button class="second" id="moonBtn">🌙 ${load('dacha.moon', false) ? 'Выключить' : 'Включить'} лунный календарь</button>
+    <p class="note">Народная традиция: на главной будет фаза Луны и подсказка.</p>
     <button class="second" id="romaBtn">${roma ? 'Выключить' : 'Включить'} режим для Ромы</button>
     <p class="note">В режиме для Ромы видны пометки о допущениях и непроверенных сроках.</p>
     ${roma ? thresholdsBlock() : ''}`;
@@ -706,6 +731,8 @@ function render() {
   bindBackup();
   const rb = document.getElementById('romaBtn');
   if (rb) rb.onclick = () => { save('dacha.roma', !isRoma()); render(); };
+  const mb = document.getElementById('moonBtn');
+  if (mb) mb.onclick = () => { save('dacha.moon', !load('dacha.moon', false)); render(); };
   window.scrollTo(0, 0);
 }
 

@@ -1,9 +1,9 @@
 // Сервис-воркер: приложение работает без интернета и получает push-уведомления.
 // Свои файлы — «сначала сеть, если нет — из памяти телефона»: так обновления приходят сразу,
 // а без интернета открывается последняя версия. Прогноз погоды не кэшируется (его хранит само приложение).
-const CACHE = 'dacha-v1';
+const CACHE = 'dacha-v2';
 const FILES = [
-  './', 'index.html', 'manifest.webmanifest', 'css/style.css', 'js/app.js', 'js/weather.js',
+  './', 'index.html', 'manifest.webmanifest', 'css/style.css', 'js/app.js', 'js/weather.js', 'js/moon.js',
   'img/icon-192.png', 'img/icon-512.png',
   ...['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards', 'shopping', 'symptoms', 'weather', 'push']
     .map(f => `data/${f}.json`),
