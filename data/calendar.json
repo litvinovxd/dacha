@@ -55,7 +55,12 @@
   "закаливание_перец": "https://profile.ru/news/society/kak-pravilno-zakalivat-rassadu-percev-pered-vysadkoj-v-otkrytyj-grunt-1303691/amp/",
   "пикировка_перец_баклажан": "https://lifehacker.ru/kogda-kak-pikirovat-rassadu/amp/ ; https://profile.ru/news/society/pikirovka-baklazhanov-kak-ee-pravilno-delat-i-uhazhivat-za-rassadoj-posle-1302306/amp/",
   "жимолость": "https://www.sotki.ru/sad_ogorod/article/zhimolost-posadka-i-uhod-7240 ; https://www.osnmedia.ru/lifehack/kak-pravilno-obrezat-zhimolost/",
-  "слива": "https://www.sotki.ru/sad_ogorod/article/obrezka-slivy-6573"
+  "слива": "https://www.sotki.ru/sad_ogorod/article/obrezka-slivy-6573",
+  "свёкла": "https://eos.com/ru/blog/vyrashhivanie-svekly/ ; https://vikna.tv/ru/styl-zhyttya/sadovodstvo-y-ogorod/kogda-sazhat-sveklu-2025/amp/",
+  "лук_севок": "https://lifehacker.ru/kak-vyrastit-luk/",
+  "пасынкование": "https://rg.ru/post/kak-pravilno-pasynkovat-pomidory-shemy-dlia-teplicy-i-otkrytogo-grunta.html",
+  "подвязка": "https://www.osnmedia.ru/lifehack/kak-pravilno-podvyazat-vysokoroslye-tomaty/",
+  "георгины": "https://lifehacker.ru/kogda-vykapyvat-georginy/ ; https://t-j.ru/dahlia-dig-out/"
  },
  "дела": [
   {
@@ -229,18 +234,20 @@
    "культура": "svekla",
    "что": "Посеять свёклу",
    "якорь": "pochva_8",
-   "смещение": 5,
-   "окно": 7,
-   "проверено": false
+   "смещение": 0,
+   "окно": 10,
+   "проверено": true,
+   "как": "Когда земля на глубине 5–7 см прогреется до +8…+10 °C. Свежий навоз не вносить."
   },
   {
    "id": "luk-posadka",
    "культура": "luk",
    "что": "Посадить лук",
    "якорь": "pochva_8",
-   "смещение": 0,
+   "смещение": 9,
    "окно": 7,
-   "проверено": false
+   "проверено": true,
+   "как": "Когда земля на 10 см прогреется до +10…+12 °C — обычно на неделю позже моркови. Рядом с морковью."
   },
   {
    "id": "zelen-posev",
@@ -333,19 +340,20 @@
    "что": "Убрать пасынки у томатов",
    "после": "tomat-t-vysadka",
    "через": 14,
-   "окно": 70,
-   "повтор": 7,
-   "проверено": false,
-   "как": "Раз в неделю выламывать боковые побеги из пазух листьев. Срок — уточнить."
+   "окно": 75,
+   "повтор": 8,
+   "проверено": true,
+   "как": "Первый раз через 2 недели после высадки, дальше каждые 7–10 дней. Выламывать боковые побеги из пазух листьев, пока они длиной 4–6 см. Низким сортам — меньше или не нужно."
   },
   {
    "id": "tomat-podvyazka",
    "культура": "tomat",
-   "что": "Подвязать томаты в теплице",
+   "что": "Подвязать томаты в теплице к опорам",
    "после": "tomat-t-vysadka",
    "через": 14,
-   "окно": 7,
-   "проверено": false
+   "окно": 14,
+   "проверено": true,
+   "как": "Когда кусты приживутся и вырастут до 25–40 см. Опоры лучше поставить сразу при высадке, чтобы потом не повредить корни."
   },
   {
    "id": "kolorad",
@@ -436,10 +444,10 @@
    "культура": "tsvety",
    "что": "Выкопать георгины на зиму",
    "якорь": "zamorozok_osen",
-   "смещение": 3,
-   "окно": 10,
-   "проверено": false,
-   "как": "После первого заморозка, когда почернеет ботва. Срок — уточнить."
+   "смещение": 5,
+   "окно": 12,
+   "проверено": true,
+   "как": "Через 5–7 дней после заморозка, когда почернеет ботва, но до промерзания земли, в сухую погоду. Стебли срезать, оставив 8–10 см, клубни просушить и хранить в сухом тёмном подвале."
   },
   {
    "id": "malina-skashivanie",
