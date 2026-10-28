@@ -355,16 +355,42 @@ function pokupki() {
   return h;
 }
 
+// --- Что с растением ---
+function chto(plant) {
+  const S = D.symptoms;
+  if (!plant) {
+    return `<a class="back" href="#/eshche">← Ещё</a><h2>Что с растением?</h2><p>Выберите растение:</p>` +
+      S['растения'].map(r => `<a class="btn second" href="#/chto/${r.id}">${r['значок']} ${esc(r['название'])}</a>`).join('');
+  }
+  const r = S['растения'].find(x => x.id === plant);
+  const list = S['признаки'].filter(p => p['растения'].includes(plant));
+  return `<a class="back" href="#/chto">← Растения</a><h2>${r ? r['значок'] + ' ' + esc(r['название']) : ''}: что видно?</h2>` +
+    list.map(p => `<a class="task" href="#/priznak/${p.id}"><span style="font-size:1.6rem">${p['значок']}</span>
+      <div class="txt">${esc(p['что_видно'])}</div></a>`).join('') +
+    `<p class="note">Нет похожего? Сфотографируйте и отправьте Роме.</p>`;
+}
+
+function priznak(id) {
+  const p = D.symptoms['признаки'].find(x => x.id === id);
+  if (!p) return `<p>Не нашла.</p>`;
+  let h = `<a class="back" href="javascript:history.back()">← Назад</a><h2>${p['значок']} ${esc(p['что_видно'])}</h2>
+    <div class="card"><b>Что это, скорее всего</b><p>${esc(p['что_это'])}</p></div>
+    <div class="card"><b>Что делать</b><ul>${p['что_делать'].map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  if (isRoma()) h += `<div class="roma">Источник: ${esc(p['источник'])}${p['проверено'] === false ? ' — не проверено' : ''}</div>`;
+  return h;
+}
+
 // --- Ещё ---
 function eshche() {
   const roma = isRoma();
   return `<a class="btn" href="#/pokupki">🛒 Покупки</a>
+    <a class="btn" href="#/chto">🔍 Что с растением?</a>
     <h2>Как пользоваться</h2>
     <div class="card">На <b>Главной</b> — что сделать на этой неделе. Нажмите на дело — откроется подсказка.
     Сделали — нажмите квадратик. Если сделали в другой день, откройте дело и выберите день: следующие сроки сами сдвинутся.</div>
     <div class="card">На <b>Участке</b> — схема. Нажмите на грядку, теплицу или огород — увидите, что там посажено и что делать.</div>
     <h2>Скоро появится</h2>
-    <p>Погода и предупреждения о заморозках, список покупок, дневник, справочник «что с растением».</p>
+    <p>Погода и предупреждения о заморозках, дневник.</p>
     <h2>Настройки</h2>
     <button class="second" id="romaBtn">${roma ? 'Выключить' : 'Включить'} режим для Ромы</button>
     <p class="note">В режиме для Ромы видны пометки о допущениях и непроверенных сроках.</p>`;
@@ -374,10 +400,10 @@ function eshche() {
 function render() {
   const [, page, a, b] = (location.hash || '#/').split('/');
   const tab = { '': 'home', uchastok: 'uchastok', zona: 'uchastok', kalendar: 'kalendar', delo: 'kalendar',
-    kultury: 'kultury', kultura: 'kultury', eshche: 'eshche', pokupki: 'eshche' }[page || ''] || 'home';
+    kultury: 'kultury', kultura: 'kultury', eshche: 'eshche', pokupki: 'eshche', chto: 'eshche', priznak: 'eshche' }[page || ''] || 'home';
   document.querySelectorAll('.tabs a').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
   const pages = { '': home, uchastok, zona: () => zona(a), kalendar: () => kalendar(a), delo: () => delo(a, b),
-    kultury, kultura: () => kultura(a), eshche, pokupki };
+    kultury, kultura: () => kultura(a), eshche, pokupki, chto: () => chto(a), priznak: () => priznak(a) };
   view.innerHTML = (pages[page || ''] || home)();
   bindChecks();
   view.querySelectorAll('[data-have]').forEach(b => b.addEventListener('click', () => {
@@ -392,7 +418,7 @@ function render() {
 }
 
 async function start() {
-  const files = ['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards', 'shopping'];
+  const files = ['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards', 'shopping', 'symptoms'];
   const got = await Promise.all(files.map(f => fetch(`data/${f}.json`).then(r => r.json())));
   files.forEach((f, n) => { D[f] = got[n]; });
   D.tasks = Object.fromEntries(D.calendar['дела'].map(t => [t.id, t]));
