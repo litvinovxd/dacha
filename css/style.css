@@ -77,7 +77,8 @@ button, .btn {
   text-align: center; text-decoration: none; line-height: 52px; padding: 0 12px;
 }
 button.second, .btn.second { background: #fff; color: var(--accent); }
-input[type=date] { font-size: 1rem; min-height: 52px; width: 100%; padding: 6px; }
+input[type=date], .big { font-size: 1rem; min-height: 52px; width: 100%; padding: 6px; margin-top: 4px;
+  border: 2px solid var(--line); border-radius: 8px; background: #fff; color: var(--text); font-family: inherit; }
 
 .card { background: var(--card); border-radius: 12px; padding: 12px; margin: 10px 0; }
 .note { color: var(--muted); font-size: 0.85rem; }

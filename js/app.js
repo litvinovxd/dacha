@@ -169,7 +169,8 @@ function home() {
   if (soon.length) h += `<h2>Скоро</h2>` + soon.map(taskRow).join('');
   const toBuy = shopItems(shopYear()).filter(i => !i.has && i.order <= addDays(today(), 14));
   if (toBuy.length) h += `<a class="btn second" href="#/pokupki">🛒 Пора купить или заказать: ${toBuy.length}</a>`;
-  h += `<p class="note">Нажмите на дело, чтобы прочитать, как его сделать. Квадратик — отметить «Сделано».</p>`;
+  h += `<p class="note">Нажмите на дело, чтобы прочитать, как его сделать. Квадратик — отметить «Сделано».</p>
+    <a class="btn second" href="#/dnevnik">📖 Записать в дневник</a>`;
   return h;
 }
 
@@ -279,7 +280,15 @@ function zona(id) {
     const items = tasks.map(t => instance(t, y)).sort((a, b) => a.due - b.due);
     if (items.length) h += `<h3>Что здесь делать в ${year}</h3>` + items.map(taskRow).join('');
   }
+  // История: из анкеты (zones.json) + записи дневника «посадила» в этой зоне
   const hist = Object.entries(z['история'] || {});
+  const fromDiary = {};
+  for (const e of diary.filter(e => e['зона'] === id && e['вид'] === 'posadka')) {
+    const y = e['дата'].slice(0, 4);
+    (fromDiary[y] = fromDiary[y] || []).push([cropName(e['культура']), e['сорт']].filter(Boolean).join(' '));
+  }
+  for (const [y, list] of Object.entries(fromDiary)) hist.push([y, list.join(', ') + ' (из дневника)']);
+  hist.sort((p, q) => q[0].localeCompare(p[0]));
   if (hist.length) h += `<h3>Что росло раньше</h3>` + hist.map(([y, t]) => `<p><b>${y}:</b> ${esc(t)}</p>`).join('');
   if (isRoma() && !z['проверено']) h += `<div class="roma">Для Ромы: ${esc(z['откуда_размер'])}</div>`;
   return h;
@@ -492,10 +501,174 @@ function bindThresholds() {
   }));
 }
 
+// --- Дневник ---
+// Записи — в localStorage ('dacha.diary'), фото — в IndexedDB (они большие).
+// Копия всего (записи, отметки «сделано», покупки) — файлом через «Отправить копию Роме».
+let diary = load('dacha.diary', []);
+const KINDS = { posadka: '🌱 Посадила', urozhay: '🧺 Урожай', zametka: '📝 Заметка' };
+const HARVEST = ['много', 'нормально', 'мало'];
+const BACKUP_DAYS = 14;
+
+function photoDb() {
+  return new Promise((ok, fail) => {
+    const r = indexedDB.open('dacha', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('photos');
+    r.onsuccess = () => ok(r.result);
+    r.onerror = () => fail(r.error);
+  });
+}
+async function photoPut(id, blob) {
+  const db = await photoDb();
+  return new Promise(ok => { const tx = db.transaction('photos', 'readwrite'); tx.objectStore('photos').put(blob, id); tx.oncomplete = ok; });
+}
+async function photoGet(id) {
+  const db = await photoDb();
+  return new Promise(ok => { const q = db.transaction('photos').objectStore('photos').get(id); q.onsuccess = () => ok(q.result); q.onerror = () => ok(null); });
+}
+
+// Уменьшаем фото до 1280 px, чтобы не забить память телефона
+function shrink(file) {
+  return new Promise(ok => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1280 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = img.width * k; c.height = img.height * k;
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(ok, 'image/jpeg', 0.75);
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function saveDiary() {
+  save('dacha.diary', diary);
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist();  // просим не очищать данные
+}
+
+function zoneName(id) { const z = D.zones['зоны'].find(q => q.id === id); return z ? z['название'] : ''; }
+function cropName(id) { return D.crops[id] ? D.crops[id]['название'] : ''; }
+
+function dnevnik() {
+  let h = `<h2>Дневник</h2><div style="display:flex;gap:8px">` +
+    Object.entries(KINDS).map(([k, t]) => `<a class="btn" style="font-size:0.85rem;padding:0 4px" href="#/zapis/${k}">${t}</a>`).join('') + `</div>`;
+  const last = load('dacha.backupAt', null);
+  if (diary.length && (!last || Date.now() - new Date(last).getTime() > BACKUP_DAYS * DAY)) {
+    h += `<div class="alert soft">Давно не отправляли копию дневника Роме. <a href="#/kopiya">Отправить копию</a></div>`;
+  }
+  if (!diary.length) h += `<p class="empty">Пока записей нет. Отмечайте, что и где посадили и сколько собрали — по этим записям на следующий год составится план посадок.</p>`;
+  const sorted = [...diary].sort((a, b) => b['дата'].localeCompare(a['дата']));
+  h += sorted.map(e => `<div class="card"><b>${KINDS[e['вид']]}</b> · ${fmt(parse(e['дата']))} ${parse(e['дата']).getFullYear()}
+    <br>${[cropName(e['культура']), e['сорт'], zoneName(e['зона'])].filter(Boolean).map(esc).join(' · ')}
+    ${e['урожай'] ? `<br>Урожай: ${esc(e['урожай'])}${e['кг'] ? `, ${esc(e['кг'])} кг` : ''}` : ''}
+    ${e['заметка'] ? `<p>${esc(e['заметка'])}</p>` : ''}
+    ${e['фото'] ? `<img data-photo="${e.id}" alt="фото" style="width:100%;border-radius:8px;margin-top:6px">` : ''}
+    <button class="second" data-del="${e.id}" style="min-height:48px;line-height:44px">Удалить запись</button></div>`).join('');
+  h += `<a class="btn second" href="#/kopiya">📤 Копия для Ромы</a>`;
+  return h;
+}
+
+function zapis(kind) {
+  const opt = (list, sel) => list.map(([v, t]) => `<option value="${esc(v)}"${v === sel ? ' selected' : ''}>${esc(t)}</option>`).join('');
+  const zones = D.zones['зоны'].filter(z => z['тип'] !== 'дом').map(z => [z.id, z['название']]);
+  const crops = D.cropsList.map(c => [c.id, c['название']]);
+  let h = `<a class="back" href="#/dnevnik">← Дневник</a><h2>${KINDS[kind]}</h2>
+    <label class="card" style="display:block">Когда<input type="date" id="fDate" value="${iso(today())}"></label>
+    <label class="card" style="display:block">Что<select id="fCrop" class="big"><option value="">—</option>${opt(crops)}</select></label>
+    <label class="card" style="display:block">Сорт<input id="fVar" list="varList" class="big" placeholder="можно не заполнять"><datalist id="varList"></datalist></label>
+    <label class="card" style="display:block">Где<select id="fZone" class="big"><option value="">—</option>${opt(zones)}</select></label>`;
+  if (kind === 'urozhay') {
+    h += `<div class="card">Сколько<div style="display:flex;gap:6px">${HARVEST.map(x =>
+      `<button class="second" data-harv="${x}" style="font-size:0.9rem">${x}</button>`).join('')}</div>
+      <label>или в килограммах<input type="number" id="fKg" class="big" inputmode="decimal"></label></div>`;
+  }
+  h += `<label class="card" style="display:block">Заметка<textarea id="fNote" rows="3" class="big"></textarea></label>
+    <label class="card" style="display:block">Фото (по желанию)<input type="file" id="fPhoto" accept="image/*" capture="environment"></label>
+    <button id="fSave">Сохранить</button>`;
+  return h;
+}
+
+function bindDiary(kind) {
+  view.querySelectorAll('[data-photo]').forEach(async img => {
+    const b = await photoGet(img.dataset.photo);
+    if (b) img.src = URL.createObjectURL(b); else img.remove();
+  });
+  view.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+    if (!confirm('Удалить эту запись?')) return;
+    diary = diary.filter(e => e.id !== b.dataset.del);
+    saveDiary(); render();
+  });
+  const crop = document.getElementById('fCrop');
+  if (crop) crop.onchange = () => {
+    document.getElementById('varList').innerHTML = D.varieties['сорта'].filter(v => v['культура'] === crop.value)
+      .map(v => `<option value="${esc(v['сорт'])}">`).join('');
+  };
+  let harvest = '';
+  view.querySelectorAll('[data-harv]').forEach(b => b.onclick = () => {
+    harvest = b.dataset.harv;
+    view.querySelectorAll('[data-harv]').forEach(x => x.classList.toggle('second', x !== b));
+  });
+  const sv = document.getElementById('fSave');
+  if (sv) sv.onclick = async () => {
+    const e = { id: Date.now().toString(36), 'вид': kind, 'дата': document.getElementById('fDate').value,
+      'культура': crop.value, 'сорт': document.getElementById('fVar').value.trim(), 'зона': document.getElementById('fZone').value,
+      'заметка': document.getElementById('fNote').value.trim() };
+    if (kind === 'urozhay') { e['урожай'] = harvest; e['кг'] = document.getElementById('fKg').value; }
+    const f = document.getElementById('fPhoto').files[0];
+    if (f) { await photoPut(e.id, await shrink(f)); e['фото'] = true; }
+    diary.push(e);
+    saveDiary();
+    location.hash = '#/dnevnik';
+  };
+}
+
+// Копия данных: всё, что мама отметила в телефоне (без фото)
+function backupData() {
+  return { 'приложение': 'Дачный помощник', 'создано': new Date().toISOString(),
+    diary, done, have: load('dacha.have', {}) };
+}
+
+function kopiya() {
+  return `<a class="back" href="#/dnevnik">← Дневник</a><h2>Копия для Ромы</h2>
+    <p>Копия дневника и всех отметок («сделано», «уже есть»). Фото в копию не входят.</p>
+    <button id="bkSend">📤 Отправить копию Роме</button>
+    <p class="note">Откроется выбор: WhatsApp → Рома.</p>
+    <h3>Загрузить копию</h3>
+    <p class="note">Для Ромы: выберите файл копии от мамы — записи добавятся к этому телефону.</p>
+    <input type="file" id="bkLoad" accept=".json,application/json">`;
+}
+
+function bindBackup() {
+  const send = document.getElementById('bkSend');
+  if (send) send.onclick = async () => {
+    const name = `dacha-${iso(today())}.json`;
+    const file = new File([JSON.stringify(backupData(), null, 1)], name, { type: 'application/json' });
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Дачный помощник: копия' });
+      else { const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; a.click(); }
+      save('dacha.backupAt', new Date().toISOString());
+    } catch (e) { /* мама передумала отправлять */ }
+  };
+  const ld = document.getElementById('bkLoad');
+  if (ld) ld.onchange = async () => {
+    try {
+      const j = JSON.parse(await ld.files[0].text());
+      const ids = new Set(diary.map(e => e.id));
+      diary = diary.concat((j.diary || []).filter(e => !ids.has(e.id)));
+      done = { ...done, ...(j.done || {}) };
+      have = { ...have, ...(j.have || {}) };
+      saveDiary(); save('dacha.done', done); save('dacha.have', have);
+      alert('Копия загружена.');
+      location.hash = '#/dnevnik';
+    } catch (e) { alert('Не получилось прочитать файл: ' + e.message); }
+  };
+}
+
 // --- Ещё ---
 function eshche() {
   const roma = isRoma();
-  return `<a class="btn" href="#/pokupki">🛒 Покупки</a>
+  return `<a class="btn" href="#/dnevnik">📖 Дневник</a>
+    <a class="btn" href="#/pokupki">🛒 Покупки</a>
     <a class="btn" href="#/chto">🔍 Что с растением?</a>
     <h2>Как пользоваться</h2>
     <div class="card">На <b>Главной</b> — что сделать на этой неделе. Нажмите на дело — откроется подсказка.
@@ -513,10 +686,12 @@ function eshche() {
 function render() {
   const [, page, a, b] = (location.hash || '#/').split('/');
   const tab = { '': 'home', uchastok: 'uchastok', zona: 'uchastok', kalendar: 'kalendar', delo: 'kalendar',
-    kultury: 'kultury', kultura: 'kultury', eshche: 'eshche', pokupki: 'eshche', chto: 'eshche', priznak: 'eshche' }[page || ''] || 'home';
+    kultury: 'kultury', kultura: 'kultury', eshche: 'eshche', pokupki: 'eshche', chto: 'eshche', priznak: 'eshche',
+    dnevnik: 'eshche', zapis: 'eshche', kopiya: 'eshche' }[page || ''] || 'home';
   document.querySelectorAll('.tabs a').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
   const pages = { '': home, uchastok, zona: () => zona(a), kalendar: () => kalendar(a), delo: () => delo(a, b),
-    kultury, kultura: () => kultura(a), eshche, pokupki, chto: () => chto(a), priznak: () => priznak(a) };
+    kultury, kultura: () => kultura(a), eshche, pokupki, chto: () => chto(a), priznak: () => priznak(a),
+    dnevnik, zapis: () => zapis(a), kopiya };
   view.innerHTML = (pages[page || ''] || home)();
   bindChecks();
   view.querySelectorAll('[data-have]').forEach(b => b.addEventListener('click', () => {
@@ -527,6 +702,8 @@ function render() {
   }));
   bindPush();
   bindThresholds();
+  bindDiary(a);
+  bindBackup();
   const rb = document.getElementById('romaBtn');
   if (rb) rb.onclick = () => { save('dacha.roma', !isRoma()); render(); };
   window.scrollTo(0, 0);
