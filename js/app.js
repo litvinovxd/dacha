@@ -124,9 +124,47 @@ function bindChecks() {
   }));
 }
 
+// --- Погода ---
+const WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+let forecast = load('dacha.forecast', null);   // { got: ISO-время, daily: {...} }
+
+function weatherCfg() {
+  const own = load('dacha.weatherCfg', {});  // пороги, поменянные в настройках
+  return { ...D.weather, 'пороги': { ...D.weather['пороги'], ...own } };
+}
+
+async function loadForecast() {
+  const fresh = forecast && Date.now() - new Date(forecast.got).getTime() < 3 * 3600 * 1000;
+  if (fresh && !new URLSearchParams(location.search).get('date')) return;
+  try {
+    const r = await fetch(D.weather['прогноз_api']);
+    const j = await r.json();
+    forecast = { got: new Date().toISOString(), daily: j.daily };
+    save('dacha.forecast', forecast);
+    if (!location.hash || location.hash === '#/') render();
+  } catch (e) { /* нет интернета — покажем сохранённый прогноз */ }
+}
+
+function weatherBlock() {
+  if (!forecast) return `<p class="note">Прогноз погоды загружается…</p>`;
+  const d = forecast.daily, t = iso(today());
+  const hs = Weather.hints(d, weatherCfg(), t);
+  let h = hs.map(x => `<div class="alert${x['важно'] ? '' : ' soft'}">${esc(x['текст'])}</div>`).join('');
+  const i0 = Math.max(0, d.time.indexOf(t));
+  h += `<div class="wx">` + d.time.slice(i0, i0 + 7).map((day, k) => {
+    const i = i0 + k, dt = parse(day);
+    const rain = d.precipitation_sum[i] >= 1 ? `, ${Math.round(d.precipitation_sum[i])} мм` : '';
+    return `<div class="wxrow"><b>${k === 0 ? 'Сегодня' : k === 1 ? 'Завтра' : WEEKDAYS[dt.getDay()] + ' ' + dt.getDate()}</b>
+      <span>ночью ${Math.round(d.temperature_2m_min[i])}°, днём ${Math.round(d.temperature_2m_max[i])}°, ${Weather.sky(d.weather_code[i])}${rain}</span></div>`;
+  }).join('') + `</div>`;
+  const ago = Math.round((Date.now() - new Date(forecast.got).getTime()) / 3600000);
+  if (ago >= 6) h += `<p class="note">Прогноз обновлён ${ago} ч назад — нет интернета?</p>`;
+  return h;
+}
+
 function home() {
   const { now, soon } = weekTasks();
-  let h = `<h2>На этой неделе</h2>`;
+  let h = `<h2>Погода</h2>${weatherBlock()}<h2>На этой неделе</h2>`;
   h += now.length ? now.map(taskRow).join('') : `<p class="empty">На этой неделе дел по календарю нет.</p>`;
   if (soon.length) h += `<h2>Скоро</h2>` + soon.map(taskRow).join('');
   const toBuy = shopItems(shopYear()).filter(i => !i.has && i.order <= addDays(today(), 14));
@@ -380,6 +418,80 @@ function priznak(id) {
   return h;
 }
 
+// --- Уведомления о погоде ---
+function b64ToBytes(s) {
+  const pad = '='.repeat((4 - s.length % 4) % 4);
+  const raw = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
+}
+
+function pushBlock() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    return `<p class="note">Этот браузер не умеет получать уведомления. Откройте приложение в Chrome.</p>`;
+  }
+  const code = load('dacha.pushCode', '');
+  let h = `<button id="pushOn">🔔 Включить предупреждения о погоде</button>
+    <p class="note">Вечером придёт уведомление, только если ночью заморозок, завтра жара, ливень или риск фитофторы. В спокойные дни — тишина.</p>`;
+  if (code) {
+    h += `<div class="card"><b>Готово! Отправьте этот код Роме</b> — он подключит уведомления:
+      <textarea id="pushCode" readonly rows="4" style="width:100%;font-size:0.7rem">${esc(code)}</textarea>
+      <button class="second" id="pushCopy">📋 Скопировать код</button>
+      <a class="btn second" href="https://wa.me/?text=${encodeURIComponent(code)}" target="_blank" rel="noopener">Отправить в WhatsApp</a></div>
+      <button class="second" id="pushTest">Проверить: показать уведомление сейчас</button>`;
+  }
+  return h;
+}
+
+function bindPush() {
+  const on = document.getElementById('pushOn');
+  if (on) on.onclick = async () => {
+    try {
+      if (await Notification.requestPermission() !== 'granted') {
+        alert('Уведомления запрещены. Разрешите их в настройках Chrome для этого сайта.');
+        return;
+      }
+      const reg = await navigator.serviceWorker.ready;
+      const old = await reg.pushManager.getSubscription();
+      if (old) await old.unsubscribe();   // переподписка — на случай, если старая перестала работать
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(D.push['vapid_public_key']) });
+      save('dacha.pushCode', JSON.stringify(sub));
+      render();
+    } catch (e) { alert('Не получилось включить: ' + e.message); }
+  };
+  const copy = document.getElementById('pushCopy');
+  if (copy) copy.onclick = () => {
+    const t = document.getElementById('pushCode');
+    t.select();
+    (navigator.clipboard ? navigator.clipboard.writeText(t.value) : Promise.resolve(document.execCommand('copy')))
+      .then(() => { copy.textContent = '✓ Скопировано'; });
+  };
+  const test = document.getElementById('pushTest');
+  if (test) test.onclick = async () => {
+    const reg = await navigator.serviceWorker.ready;
+    reg.showNotification('Дачный помощник', { body: 'Так будут выглядеть предупреждения о погоде', icon: 'img/icon-192.png' });
+  };
+}
+
+// Пороги погоды (для Ромы)
+const TH = [['заморозок_ночью_до', 'Заморозок: ночью не теплее, °C'], ['жара_днём_от', 'Жара: днём от, °C'],
+  ['ливень_мм_от', 'Ливень: от, мм в день'], ['фитофтора_ночь_до', 'Фитофтора: ночи не теплее, °C']];
+
+function thresholdsBlock() {
+  const P = weatherCfg()['пороги'];
+  return `<h3>Пороги погоды</h3>` + TH.map(([k, label]) =>
+    `<label class="card" style="display:block">${label}<br><input type="number" data-th="${k}" value="${P[k]}"
+      style="font-size:1rem;min-height:48px;width:100%"></label>`).join('') +
+    `<p class="note">Меняются только на этом телефоне. Для уведомлений — поменять в data/weather.json.</p>`;
+}
+
+function bindThresholds() {
+  view.querySelectorAll('[data-th]').forEach(inp => inp.addEventListener('change', () => {
+    const own = load('dacha.weatherCfg', {});
+    own[inp.dataset.th] = Number(inp.value);
+    save('dacha.weatherCfg', own);
+  }));
+}
+
 // --- Ещё ---
 function eshche() {
   const roma = isRoma();
@@ -389,11 +501,12 @@ function eshche() {
     <div class="card">На <b>Главной</b> — что сделать на этой неделе. Нажмите на дело — откроется подсказка.
     Сделали — нажмите квадратик. Если сделали в другой день, откройте дело и выберите день: следующие сроки сами сдвинутся.</div>
     <div class="card">На <b>Участке</b> — схема. Нажмите на грядку, теплицу или огород — увидите, что там посажено и что делать.</div>
-    <h2>Скоро появится</h2>
-    <p>Погода и предупреждения о заморозках, дневник.</p>
+    <h2>Предупреждения о погоде</h2>
+    ${pushBlock()}
     <h2>Настройки</h2>
     <button class="second" id="romaBtn">${roma ? 'Выключить' : 'Включить'} режим для Ромы</button>
-    <p class="note">В режиме для Ромы видны пометки о допущениях и непроверенных сроках.</p>`;
+    <p class="note">В режиме для Ромы видны пометки о допущениях и непроверенных сроках.</p>
+    ${roma ? thresholdsBlock() : ''}`;
 }
 
 // ---------- Маршруты ----------
@@ -412,13 +525,16 @@ function render() {
     save('dacha.have', have);
     render();
   }));
+  bindPush();
+  bindThresholds();
   const rb = document.getElementById('romaBtn');
   if (rb) rb.onclick = () => { save('dacha.roma', !isRoma()); render(); };
   window.scrollTo(0, 0);
 }
 
 async function start() {
-  const files = ['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards', 'shopping', 'symptoms'];
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  const files = ['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards', 'shopping', 'symptoms', 'weather', 'push'];
   const got = await Promise.all(files.map(f => fetch(`data/${f}.json`).then(r => r.json())));
   files.forEach((f, n) => { D[f] = got[n]; });
   D.tasks = Object.fromEntries(D.calendar['дела'].map(t => [t.id, t]));
@@ -431,6 +547,7 @@ async function start() {
   });
   window.addEventListener('hashchange', render);
   render();
+  loadForecast();
 }
 
 start().catch(e => { view.innerHTML = `<p>Не получилось загрузить данные. Проверьте интернет и обновите страницу.</p><p class="note">${esc(e)}</p>`; });

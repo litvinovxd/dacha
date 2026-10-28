@@ -1,0 +1,9 @@
+{
+  "name": "dacha-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Скрипты проекта: уведомления о погоде",
+  "dependencies": {
+    "web-push": "3.6.7"
+  }
+}

@@ -1,0 +1,45 @@
+# Вечернее уведомление о погоде маме (и Роме).
+# Каждый день в 10:00 UTC = 19:00 по Амурской области. Ручной запуск — вкладка Actions → «Погода» → Run workflow.
+name: Погода
+
+on:
+  schedule:
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Отправить проверочное уведомление"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write   # нужно только для ежемесячной отметки активности (см. ниже)
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci --omit=dev
+        working-directory: scripts
+      - run: node scripts/notify.mjs
+        env:
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          PUSH_SUBSCRIPTIONS: ${{ secrets.PUSH_SUBSCRIPTIONS }}
+          MODE: ${{ inputs.test && 'test' || '' }}
+      # GitHub отключает расписание, если в публичном репозитории 60 дней не было изменений.
+      # Раз в месяц делаем маленький коммит, чтобы уведомления не остановились сами.
+      - name: Отметка активности (1-го числа)
+        if: github.event_name == 'schedule'
+        run: |
+          if [ "$(date -u +%d)" = "01" ]; then
+            date -u +%F > scripts/heartbeat.txt
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git add scripts/heartbeat.txt
+            git commit -m "Отметка активности для расписания уведомлений" && git push
+          fi

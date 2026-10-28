@@ -1,0 +1,4 @@
+{
+ "_описание": "Публичный ключ для push-подписки (не секрет). Закрытый ключ — только в секретах GitHub (VAPID_PRIVATE_KEY).",
+ "vapid_public_key": "BMCEtocrFe5oty8cmpeEYXEI__CoXzagWCfAJZFgZaiEnjWFpAc2mFVs_LGzUKHvIKQ-uANBM3zDMFGd6nK_rxs"
+}
