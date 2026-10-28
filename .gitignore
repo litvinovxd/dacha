@@ -1,0 +1,5 @@
+# Секреты никогда не кладём в репозиторий
+.env
+*.key
+vapid*.json
+node_modules/
