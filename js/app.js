@@ -129,6 +129,8 @@ function home() {
   let h = `<h2>На этой неделе</h2>`;
   h += now.length ? now.map(taskRow).join('') : `<p class="empty">На этой неделе дел по календарю нет.</p>`;
   if (soon.length) h += `<h2>Скоро</h2>` + soon.map(taskRow).join('');
+  const toBuy = shopItems(shopYear()).filter(i => !i.has && i.order <= addDays(today(), 14));
+  if (toBuy.length) h += `<a class="btn second" href="#/pokupki">🛒 Пора купить или заказать: ${toBuy.length}</a>`;
   h += `<p class="note">Нажмите на дело, чтобы прочитать, как его сделать. Квадратик — отметить «Сделано».</p>`;
   return h;
 }
@@ -289,10 +291,75 @@ function cardHtml(id) {
   return h;
 }
 
+// --- Покупки ---
+let have = load('dacha.have', {});   // "2027:semena-tomat" -> true
+
+// Покупки готовим заранее: с августа — уже к следующему сезону
+function shopYear() {
+  const t = today();
+  return t.getMonth() >= 7 ? t.getFullYear() + 1 : t.getFullYear();
+}
+
+function shopItems(year) {
+  const S = D.shopping;
+  return S['покупки'].filter(p => !p['с_года'] || year >= p['с_года']).map(p => {
+    let need;
+    if (p['нужно_к']) need = startOf(D.tasks[p['нужно_к']], year);
+    else { const [m, d] = p['дата_нужно'].split('-').map(Number); need = new Date(year, m - 1, d); }
+    const order = addDays(need, -S['доставка'][p['доставка']]['дней']);
+    return { p, need, order, key: `${year}:${p.id}`, has: !!have[`${year}:${p.id}`] };
+  }).sort((a, b) => a.order - b.order);
+}
+
+function varietyLine(crops) {
+  const ids = crops.split(',');
+  return D.varieties['сорта'].filter(v => ids.includes(v['культура']) && v['выбран']).map(v =>
+    v['магазин_мамы'] ? `<a href="${esc(v['магазин_мамы']['ссылка'])}" target="_blank" rel="noopener">${esc(v['сорт'])}</a>` : esc(v['сорт'])
+  ).join(', ');
+}
+
+function shopRow(i) {
+  const t = today();
+  const late = !i.has && i.order < t;
+  const how = i.p['доставка'] === 'почта' ? 'заказать до' : 'купить до';
+  return `<div class="task${late ? ' late' : ''}${i.has ? ' done' : ''}">
+    <button class="check${i.has ? ' on' : ''}" data-have="${i.key}" aria-label="Уже есть">${i.has ? '✓' : ''}</button>
+    <div class="txt"><div>${esc(i.p['что'])}</div>
+    <div class="when">${late ? 'Пора! ' : ''}${how} ${fmt(i.order)} · нужно к ${fmt(i.need)}</div>
+    ${i.p['сорта_культуры'] ? `<div class="note">Сорта: ${varietyLine(i.p['сорта_культуры'])}</div>` : ''}
+    ${i.p['примечание'] ? `<div class="note">${esc(i.p['примечание'])}</div>` : ''}</div></div>`;
+}
+
+function pokupki() {
+  const y = shopYear();
+  const items = shopItems(y);
+  const t = today();
+  const todo = items.filter(i => !i.has), got = items.filter(i => i.has);
+  let h = `<a class="back" href="#/eshche">← Ещё</a><h2>Покупки к сезону ${y}</h2>
+    <p class="note">Галочка — «уже есть»: вещь уйдёт вниз списка. Почтой заказывать заранее — доставка до Февральска долгая.</p>`;
+  const mail = todo.filter(i => i.p['доставка'] === 'почта' && i.p.id.startsWith('semena'));
+  if (mail.length) h += `<div class="card">💡 Удобнее заказать <b>все семена одним заказом до ${fmt(mail[0].order)}</b> —
+    одна посылка, и проще набрать минимальный заказ.</div>`;
+  const urgent = todo.filter(i => i.order <= addDays(t, 14));
+  if (urgent.length) h += `<h2>Срочно</h2>` + urgent.map(shopRow).join('');
+  const rest = todo.filter(i => i.order > addDays(t, 14));
+  let month = -1;
+  for (const i of rest) {
+    if (i.order.getMonth() !== month) { month = i.order.getMonth(); h += `<h2>${MONTHS_TITLE[month]}</h2>`; }
+    h += shopRow(i);
+  }
+  if (got.length) h += `<h2>Уже есть</h2>` + got.map(shopRow).join('');
+  const m = D.shopping['магазин'];
+  h += `<p class="note">Магазин: <a href="${esc(m['сайт'])}" target="_blank" rel="noopener">${esc(m['название'])}</a>, семена — заказ от ${m['минимальный_заказ_семян_руб']} ₽.</p>`;
+  if (isRoma()) h += `<div class="roma">Для Ромы: срок почтовой доставки (42 дня) — допущение, уточнить у мамы.</div>`;
+  return h;
+}
+
 // --- Ещё ---
 function eshche() {
   const roma = isRoma();
-  return `<h2>Как пользоваться</h2>
+  return `<a class="btn" href="#/pokupki">🛒 Покупки</a>
+    <h2>Как пользоваться</h2>
     <div class="card">На <b>Главной</b> — что сделать на этой неделе. Нажмите на дело — откроется подсказка.
     Сделали — нажмите квадратик. Если сделали в другой день, откройте дело и выберите день: следующие сроки сами сдвинутся.</div>
     <div class="card">На <b>Участке</b> — схема. Нажмите на грядку, теплицу или огород — увидите, что там посажено и что делать.</div>
@@ -307,19 +374,25 @@ function eshche() {
 function render() {
   const [, page, a, b] = (location.hash || '#/').split('/');
   const tab = { '': 'home', uchastok: 'uchastok', zona: 'uchastok', kalendar: 'kalendar', delo: 'kalendar',
-    kultury: 'kultury', kultura: 'kultury', eshche: 'eshche' }[page || ''] || 'home';
+    kultury: 'kultury', kultura: 'kultury', eshche: 'eshche', pokupki: 'eshche' }[page || ''] || 'home';
   document.querySelectorAll('.tabs a').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
   const pages = { '': home, uchastok, zona: () => zona(a), kalendar: () => kalendar(a), delo: () => delo(a, b),
-    kultury, kultura: () => kultura(a), eshche };
+    kultury, kultura: () => kultura(a), eshche, pokupki };
   view.innerHTML = (pages[page || ''] || home)();
   bindChecks();
+  view.querySelectorAll('[data-have]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.have;
+    if (have[k]) delete have[k]; else have[k] = true;
+    save('dacha.have', have);
+    render();
+  }));
   const rb = document.getElementById('romaBtn');
   if (rb) rb.onclick = () => { save('dacha.roma', !isRoma()); render(); };
   window.scrollTo(0, 0);
 }
 
 async function start() {
-  const files = ['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards'];
+  const files = ['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards', 'shopping'];
   const got = await Promise.all(files.map(f => fetch(`data/${f}.json`).then(r => r.json())));
   files.forEach((f, n) => { D[f] = got[n]; });
   D.tasks = Object.fromEntries(D.calendar['дела'].map(t => [t.id, t]));
