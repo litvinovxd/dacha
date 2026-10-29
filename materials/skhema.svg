@@ -13,7 +13,8 @@
 <circle cx="110" cy="726" r="132" fill="#2f5d3a" opacity="0.35"/>
 <circle cx="242" cy="1089" r="116" fill="#2f5d3a" opacity="0.35"/>
 <polygon points="598,295 706,221 835,370 722,477" fill="#c0504d" stroke="#333" stroke-width="2"/>
-<polygon points="636,468 501,355 388,490 523,603" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="572,431 567,459 552,481 529,496 502,501 476,496 453,481 438,459 433,431 438,405 453,383 476,368 502,362 529,368 552,383 567,405" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="582,498 572,479 502,516 512,536" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="662,901 718,833 617,749 561,816" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="617,931 637,907 569,851 550,874" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="584,974 604,950 536,894 516,917" fill="#9fc97a" stroke="#333" stroke-width="2"/>
@@ -31,7 +32,8 @@
 <polygon points="1318,742 1467,651 1698,742 1500,974 1293,767" fill="#5f8f6b" stroke="#333" stroke-width="2"/>
 <polygon points="1053,210 1139,142 1301,290 1165,358 1053,233" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <text x="715" y="341" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Дом</text>
-<text x="512" y="479" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Цветник у дома</text>
+<text x="502" y="432" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Клумбы из покрышек</text>
+<text x="542" y="507" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Длинная клумба</text>
 <text x="639" y="825" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Теплица</text>
 <text x="593" y="891" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 1</text>
 <text x="560" y="934" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 2</text>

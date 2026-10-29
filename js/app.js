@@ -273,7 +273,7 @@ const ID_LOOK = { 'teplitsa-novaya': { fill: 'url(#glass)', chip: '#9ccbe3', das
 const SHORT = { dom: 'Дом', klumba: 'Цветник', teplitsa: 'Теплица', 'teplitsa-novaya': 'Новая теплица', 'ogorod-bolshoy-verh': 'Огород, верх',
   'ogorod-bolshoy-niz': 'Огород, низ', 'ogorod-vtoroy': 'Второй огород', 'sliva-zhimolost': 'Слива, жимолость' };
 // сдвиг подписи на схеме (в метрах: вправо, вверх), чтобы не наезжала на соседей
-const LABEL_SHIFT = { teplitsa: [0, 4], 'teplitsa-novaya': [-3.5, 4.5], 'ogorod-bolshoy-verh': [-2.5, 1.5], klumba: [0, 2.6] };
+const LABEL_SHIFT = { teplitsa: [0, 4], 'teplitsa-novaya': [-3.5, 4.5], 'ogorod-bolshoy-verh': [-2.5, 1.5], klumba: [0, 4.6] };
 
 function mapSvg(activeId) {
   const Z = D.zones, zs = Z['зоны'];
@@ -332,12 +332,19 @@ function mapSvg(activeId) {
       const m1 = [(q[0][0] + q[1][0]) / 2, (q[0][1] + q[1][1]) / 2], m2 = [(q[2][0] + q[3][0]) / 2, (q[2][1] + q[3][1]) / 2];
       o += `<line x1="${X(m1[0])}" y1="${Y(m1[1])}" x2="${X(m2[0])}" y2="${Y(m2[1])}" stroke="#7e2b25" stroke-width="4"/>`;
     }
-    if (z['тип'] === 'клумба') {   // клумбы-покрышки двумя полукругами
-      const colors = ['#e66a9a', '#f2c230', '#c75bd6', '#f08a3c'];
+    const colors = ['#e66a9a', '#f2c230', '#c75bd6', '#f08a3c'];
+    if (z.id === 'klumba') {   // 12 клумб-покрышек по кругу
+      const q = z['контур_м'].map(R);
+      const rad = q.reduce((a, p) => a + Math.hypot(p[0] - cx, p[1] - cy), 0) / q.length * 0.78;
       for (let k = 0; k < 12; k++) {
-        const ang = Math.PI * (k % 6) / 5, ring = k < 6 ? 2.8 : 1.5;
-        const px = cx + ring * Math.cos(ang), py = cy - 1.5 + ring * Math.sin(ang);
-        o += `<circle cx="${X(px)}" cy="${Y(py)}" r="6" fill="${colors[k % 4]}" stroke="#333" stroke-width="3"/>`;
+        const ang = 2 * Math.PI * k / 12, px = cx + rad * Math.cos(ang), py = cy + rad * Math.sin(ang);
+        o += `<circle cx="${X(px)}" cy="${Y(py)}" r="7" fill="${colors[k % 4]}" stroke="#333" stroke-width="3.5"/>`;
+      }
+    } else if (z['тип'] === 'клумба') {   // обычная клумба — цветы точками
+      const q = z['контур_м'].map(R);
+      for (let k = 1; k < 6; k++) {
+        const t = k / 6, px = q[0][0] + (q[3][0] - q[0][0]) * t + (q[1][0] - q[0][0]) * 0.5, py = q[0][1] + (q[3][1] - q[0][1]) * t + (q[1][1] - q[0][1]) * 0.5;
+        o += `<circle cx="${X(px)}" cy="${Y(py)}" r="4" fill="${colors[k % 4]}"/>`;
       }
     }
     if (z['тип'] === 'ягодник') {   // кусты
