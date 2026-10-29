@@ -27,8 +27,9 @@
 <polygon points="1080,482 1099,460 1023,397 1004,419" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="1112,461 1130,439 1054,375 1036,397" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="1143,437 1161,415 1086,352 1067,374" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="1171,496 1163,475 1021,535 1029,556" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1379,655 1397,642 1266,462 1248,475" fill="#9fc97a" stroke="#333" stroke-width="2"/>
 <polygon points="1318,742 1467,651 1698,742 1500,974 1293,767" fill="#5f8f6b" stroke="#333" stroke-width="2"/>
+<polygon points="1053,210 1139,142 1301,290 1165,358 1053,233" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <text x="715" y="341" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Дом</text>
 <text x="512" y="479" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Цветник у дома</text>
 <text x="639" y="825" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Теплица</text>
@@ -44,7 +45,8 @@
 <text x="1051" y="439" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 2</text>
 <text x="1083" y="418" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 3</text>
 <text x="1114" y="395" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 4</text>
-<text x="1096" y="515" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Малина (план)</text>
+<text x="1323" y="558" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Малина (план)</text>
 <text x="1455" y="775" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Слива и жимолость</text>
+<text x="1142" y="246" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Теплица (новое место)</text>
 <text x="1702" y="50" font-size="30" text-anchor="middle">С ↑</text>
 </svg>

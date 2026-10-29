@@ -268,10 +268,12 @@ const ZONE_LOOK = {   // заливка на схеме и цвет метки �
   'клумба': { fill: '#9fcf7f', chip: '#e66a9a' }, 'ягодник': { fill: '#8dbb6e', chip: '#5d8f4a' },
   'план': { fill: 'url(#plan)', chip: '#d9467a' },
 };
-const SHORT = { dom: 'Дом', klumba: 'Цветник', teplitsa: 'Теплица', 'ogorod-bolshoy-verh': 'Огород, верх',
+// отдельный вид для конкретных мест (будущая теплица — «стекло» пунктиром)
+const ID_LOOK = { 'teplitsa-novaya': { fill: 'url(#glass)', chip: '#9ccbe3', dashed: true, opacity: 0.6 } };
+const SHORT = { dom: 'Дом', klumba: 'Цветник', teplitsa: 'Теплица', 'teplitsa-novaya': 'Новая теплица', 'ogorod-bolshoy-verh': 'Огород, верх',
   'ogorod-bolshoy-niz': 'Огород, низ', 'ogorod-vtoroy': 'Второй огород', 'sliva-zhimolost': 'Слива, жимолость' };
 // сдвиг подписи на схеме (в метрах: вправо, вверх), чтобы не наезжала на соседей
-const LABEL_SHIFT = { teplitsa: [0, 4], 'ogorod-bolshoy-verh': [-2.5, 1.5], klumba: [0, 2.6] };
+const LABEL_SHIFT = { teplitsa: [0, 4], 'teplitsa-novaya': [-3.5, 4.5], 'ogorod-bolshoy-verh': [-2.5, 1.5], klumba: [0, 2.6] };
 
 function mapSvg(activeId) {
   const Z = D.zones, zs = Z['зоны'];
@@ -319,11 +321,11 @@ function mapSvg(activeId) {
   }
 
   zs.forEach(z => {
-    const look = ZONE_LOOK[z['тип']] || { fill: '#ddd' };
+    const look = ID_LOOK[z.id] || ZONE_LOOK[z['тип']] || { fill: '#ddd' };
     const on = z.id === activeId, plan = z['тип'] === 'план';
     o += `<a href="#/zona/${z.id}" class="zone"><polygon points="${pts(z['контур_м'])}" fill="${look.fill}"
-      stroke="${on ? '#ff7a00' : plan ? '#d9467a' : '#4a3a28'}" stroke-width="${on ? 7 : 2.5}"
-      ${plan ? 'stroke-dasharray="8 5"' : ''} filter="url(#shadow)"/>`;
+      fill-opacity="${look.opacity || 1}" stroke="${on ? '#ff7a00' : ID_LOOK[z.id] ? '#3c7fa8' : plan ? '#d9467a' : '#4a3a28'}"
+      stroke-width="${on ? 7 : 2.5}" ${plan ? 'stroke-dasharray="8 5"' : ''} filter="url(#shadow)"/>`;
     const [cx, cy] = center(z['контур_м']);
     if (z['тип'] === 'дом') {   // конёк крыши
       const q = z['контур_м'].map(R);
@@ -372,8 +374,8 @@ function mapSvg(activeId) {
 function uchastok() {
   let h = `<h2>Участок</h2>${mapSvg()}<p class="note">Нажмите на место на схеме или выберите в списке.</p>`;
   h += `<div class="zlist">` + D.zones['зоны'].map((z, n) => {
-    const look = ZONE_LOOK[z['тип']] || {};
-    const dark = ['дом', 'огород', 'ягодник', 'план'].includes(z['тип']);
+    const look = ID_LOOK[z.id] || ZONE_LOOK[z['тип']] || {};
+    const dark = !ID_LOOK[z.id] && ['дом', 'огород', 'ягодник', 'план'].includes(z['тип']);
     return `<a href="#/zona/${z.id}"><span class="num" style="background:${look.chip || '#fff'};color:${dark ? '#fff' : '#111'}">${n + 1}</span>${esc(z['название'])}</a>`;
   }).join('') + `</div>`;
   return h;
