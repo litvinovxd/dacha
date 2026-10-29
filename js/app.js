@@ -276,7 +276,7 @@ const ID_LOOK = {};
 const SHORT = { dom: 'Дом', klumba: 'Цветник', 'teplitsa-novaya': 'Теплица', yabloni: 'Яблони', 'ogorod-bolshoy-verh': 'Огород, верх',
   'ogorod-bolshoy-niz': 'Огород, низ', 'ogorod-vtoroy': 'Второй огород', 'sliva-zhimolost': 'Слива, жимолость' };
 // сдвиг подписи на схеме (в метрах: вправо, вверх), чтобы не наезжала на соседей
-const LABEL_SHIFT = { 'teplitsa-novaya': [-3.5, 4.5], yabloni: [-0.5, 2.2], 'ogorod-bolshoy-verh': [-3.4, -0.4], klumba: [0, 4.6] };
+const LABEL_SHIFT = { klumba: [0, 5.4], yabloni: [-1, 3.6], 'teplitsa-novaya': [0, 0] };   // «Цветник» — над покрышками, «Яблони» — над деревьями
 
 function mapSvg(activeId) {
   const Z = D.zones, zs = Z['зоны'];
@@ -327,8 +327,8 @@ function mapSvg(activeId) {
     const look = ID_LOOK[z.id] || ZONE_LOOK[z['тип']] || { fill: '#ddd' };
     const on = z.id === activeId, plan = z['тип'] === 'план';
     o += `<a href="#/zona/${z.id}" class="zone"><polygon points="${pts(z['контур_м'])}" fill="${look.fill}"
-      fill-opacity="${look.opacity || 1}" stroke="${on ? '#ff7a00' : ID_LOOK[z.id] ? '#3c7fa8' : plan ? '#d9467a' : '#4a3a28'}"
-      stroke-width="${on ? 7 : 2.5}" ${plan ? 'stroke-dasharray="8 5"' : ''} filter="url(#shadow)"/>`;
+      fill-opacity="${look.opacity || 1}" stroke="${on ? '#ff7a00' : ID_LOOK[z.id] ? '#3c7fa8' : plan ? '#d9467a' : 'rgba(60,45,30,.55)'}"
+      stroke-width="${on ? 6 : 1.5}" ${plan ? 'stroke-dasharray="8 5"' : ''} filter="url(#shadow)"/>`;
     const [cx, cy] = center(z['контур_м']);
     if (z['тип'] === 'дом') {   // конёк крыши
       const q = z['контур_м'].map(R);
@@ -352,12 +352,15 @@ function mapSvg(activeId) {
         o += `<circle cx="${X(cx + dx)}" cy="${Y(cy + dy)}" r="14" fill="#4f8a3e" stroke="#2f5a2c" stroke-width="2"/>`;
       }
     }
-    if (z['тип'] === 'сад') {   // яблони: кроны с яблоками
-      z['контур_м'].map(R).filter((_, k) => k % 2 === 0).forEach(([vx, vy]) => {
-        const tx = cx + (vx - cx) * 0.5, ty = cy + (vy - cy) * 0.5;
-        o += `<circle cx="${X(tx)}" cy="${Y(ty)}" r="15" fill="#5c9a45" stroke="#2f5a2c" stroke-width="2"/>
-          <circle cx="${(+X(tx) - 5).toFixed(1)}" cy="${(+Y(ty) - 3).toFixed(1)}" r="3" fill="#d6372b"/>
-          <circle cx="${(+X(tx) + 5).toFixed(1)}" cy="${(+Y(ty) + 4).toFixed(1)}" r="3" fill="#d6372b"/>`;
+    if (z['тип'] === 'сад') {   // яблони: 4 кроны вдоль длинной стороны участка
+      const q = z['контур_м'].map(R);
+      let far = [q[0], q[1]], best = 0;
+      q.forEach(a => q.forEach(b => { const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (d > best) { best = d; far = [a, b]; } }));
+      [0.2, 0.4, 0.6, 0.8].forEach(t => {
+        const tx = cx + (far[0][0] + (far[1][0] - far[0][0]) * t - cx) * 0.6, ty = cy + (far[0][1] + (far[1][1] - far[0][1]) * t - cy) * 0.6;
+        o += `<circle cx="${X(tx)}" cy="${Y(ty)}" r="10" fill="#5c9a45" stroke="#2f5a2c" stroke-width="1.5"/>
+          <circle cx="${(+X(tx) - 3).toFixed(1)}" cy="${(+Y(ty) - 2).toFixed(1)}" r="2.2" fill="#d6372b"/>
+          <circle cx="${(+X(tx) + 3.5).toFixed(1)}" cy="${(+Y(ty) + 3).toFixed(1)}" r="2.2" fill="#d6372b"/>`;
       });
     }
     o += `</a>`;
@@ -373,26 +376,46 @@ function mapSvg(activeId) {
     o += `<polyline points="${line(t)}" fill="none" stroke="#efe3c2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`;
   }
 
-  // подписи: крупным местам — название, мелким — номер в кружке (как в списке под схемой)
+  // подписи: название на светлой плашке (длинное — в две строки), если помещается внутри места; иначе маленький номер
+  const FS = 15, LH = 17;
+  const fitLines = (name, wide) => {
+    const w = t => t.length * FS * 0.56 + 14;
+    if (w(name) < wide * 1.05) return [name];
+    const words = name.split(' ');
+    if (words.length < 2) return null;
+    let bestCut = 1, bestW = Infinity;   // перенос там, где обе строки покороче
+    for (let k = 1; k < words.length; k++) {
+      const m = Math.max(w(words.slice(0, k).join(' ')), w(words.slice(k).join(' ')));
+      if (m < bestW) { bestW = m; bestCut = k; }
+    }
+    return bestW < wide * 1.05 ? [words.slice(0, bestCut).join(' '), words.slice(bestCut).join(' ')] : null;
+  };
   zs.forEach((z, n) => {
     const [cx, cy] = center(z['контур_м']);
-    if (SHORT[z.id]) {
+    const q = z['контур_м'].map(R);
+    const wide = (Math.max(...q.map(p => p[0])) - Math.min(...q.map(p => p[0]))) * S;
+    const name = SHORT[z.id];
+    const lines = name && (LABEL_SHIFT[z.id] ? [name] : fitLines(name, wide));
+    if (lines) {
       const [sx, sy] = LABEL_SHIFT[z.id] || [0, 0];
-      o += `<text x="${X(cx + sx)}" y="${Y(cy + sy)}" font-size="26" font-weight="700" text-anchor="middle"
-        dominant-baseline="middle" fill="#1d1d1d" stroke="#fff" stroke-width="6" stroke-linejoin="round" paint-order="stroke"
-        pointer-events="none">${SHORT[z.id]}</text>`;
+      const lx = +X(cx + sx), ly = +Y(cy + sy);
+      const tw = Math.max(...lines.map(t => t.length * FS * 0.56 + 14)), th = lines.length * LH + 6;
+      o += `<g pointer-events="none"><rect x="${(lx - tw / 2).toFixed(1)}" y="${(ly - th / 2).toFixed(1)}" width="${tw.toFixed(1)}" height="${th}" rx="11"
+        fill="#fff" fill-opacity=".9" stroke="rgba(0,0,0,.15)"/>` +
+        lines.map((t, k) => `<text x="${lx.toFixed(1)}" y="${(ly + (k - (lines.length - 1) / 2) * LH + 0.5).toFixed(1)}" font-size="${FS}" font-weight="600"
+          text-anchor="middle" dominant-baseline="central" fill="#1d1d1d">${t}</text>`).join('') + `</g>`;
     } else {
-      o += `<g pointer-events="none"><circle cx="${X(cx)}" cy="${Y(cy)}" r="12" fill="#fff" stroke="#333" stroke-width="2"/>
-        <text x="${X(cx)}" y="${Y(cy)}" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central">${n + 1}</text></g>`;
+      o += `<g pointer-events="none"><circle cx="${X(cx)}" cy="${Y(cy)}" r="9" fill="#fff" fill-opacity=".95" stroke="rgba(0,0,0,.45)" stroke-width="1.2"/>
+        <text x="${X(cx)}" y="${(+Y(cy) + 0.5).toFixed(1)}" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#1d1d1d">${n + 1}</text></g>`;
     }
   });
 
   // стрелка на север
   const [nx, ny] = R([0, 1]);
   const rot = Math.atan2(nx, ny) * 180 / Math.PI;
-  o += `<g transform="translate(${(W - 46).toFixed(0)} 52)"><circle r="32" fill="#fff" opacity=".92"/>
-    <g transform="rotate(${rot.toFixed(1)})"><path d="M0 -26 L11 8 L0 2 L-11 8 Z" fill="#b5483f"/></g>
-    <text y="27" font-size="15" font-weight="700" text-anchor="middle">север</text></g>`;
+  o += `<g transform="translate(${(W - 34).toFixed(0)} 34)"><circle r="24" fill="#fff" fill-opacity=".9" stroke="rgba(0,0,0,.15)"/>
+    <g transform="rotate(${rot.toFixed(1)})"><path d="M0 -17 L7 5 L0 1 L-7 5 Z" fill="#b5483f"/></g>
+    <text y="17" font-size="10" font-weight="700" text-anchor="middle" fill="#44483d">С</text></g>`;
   return o + `</svg>`;
 }
 
