@@ -407,8 +407,10 @@ function zona(id) {
   for (const [year, plan] of Object.entries(D.plan).filter(([k]) => /^\d{4}$/.test(k))) {
     const p = plan['зоны'][id];
     if (!p) continue;
-    h += `<h3>План на ${year}</h3><div class="card"><b>${esc(cropNames(p['культуры']))}</b>
-      ${p['сколько'] ? `<br>${esc(p['сколько'])}` : ''}<p class="note">Почему: ${esc(p['почему'])}</p></div>`;
+    h += p['культуры'].length
+      ? `<h3>План на ${year}</h3><div class="card"><b>${esc(cropNames(p['культуры']))}</b>
+        ${p['сколько'] ? `<br>${esc(p['сколько'])}` : ''}<p class="note">Почему: ${esc(p['почему'])}</p></div>`
+      : `<h3>План на ${year}</h3><div class="card">${esc(p['почему'])}</div>`;
     const tasks = D.calendar['дела'].filter(t => p['культуры'].includes(t['культура']) || (t['зоны'] || []).includes(id));
     const y = Number(year);
     const items = tasks.map(t => instance(t, y)).sort((a, b) => a.due - b.due);
