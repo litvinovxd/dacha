@@ -276,7 +276,7 @@ const ID_LOOK = {};
 const SHORT = { dom: 'Дом', klumba: 'Цветник', 'teplitsa-novaya': 'Теплица', yabloni: 'Яблони', 'ogorod-bolshoy-verh': 'Огород, верх',
   'ogorod-bolshoy-niz': 'Огород, низ', 'ogorod-vtoroy': 'Второй огород', 'sliva-zhimolost': 'Слива, жимолость' };
 // сдвиг подписи на схеме (в метрах: вправо, вверх), чтобы не наезжала на соседей
-const LABEL_SHIFT = { 'teplitsa-novaya': [-3.5, 4.5], yabloni: [-0.5, 2.2], 'ogorod-bolshoy-verh': [-2.2, -0.6], klumba: [0, 4.6] };
+const LABEL_SHIFT = { 'teplitsa-novaya': [-3.5, 4.5], yabloni: [-0.5, 2.2], 'ogorod-bolshoy-verh': [-3.4, -0.4], klumba: [0, 4.6] };
 
 function mapSvg(activeId) {
   const Z = D.zones, zs = Z['зоны'];

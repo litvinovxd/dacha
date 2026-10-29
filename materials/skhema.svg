@@ -24,10 +24,10 @@
 <polygon points="697,687 1078,623 1164,712 959,855 909,811 792,912 620,745" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="610,739 573,703 575,701 575,672 603,645 635,623 668,599 703,576 741,558 741,558 745,547 794,634 820,671 763,730 675,794" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="995,535 1182,457 1194,477 1221,459 1377,675 1298,729 1165,712" fill="#9fc97a" stroke="#333" stroke-width="2"/>
-<polygon points="1030,511 1055,498 1010,410 985,423" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="1061,490 1086,477 1042,389 1016,402" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="1093,468 1118,455 1073,367 1048,380" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="1124,445 1149,432 1105,344 1079,357" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1055,507 1074,485 998,421 979,443" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1083,474 1101,452 1026,388 1007,410" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1110,441 1129,419 1053,355 1035,377" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1138,408 1156,386 1081,322 1062,344" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="1379,655 1397,642 1266,462 1248,475" fill="#9fc97a" stroke="#333" stroke-width="2"/>
 <polygon points="1318,742 1467,651 1698,742 1500,974 1293,767" fill="#5f8f6b" stroke="#333" stroke-width="2"/>
 <polygon points="1053,210 1139,142 1301,290 1165,358 1053,233" fill="#f6d743" stroke="#333" stroke-width="2"/>
@@ -43,10 +43,10 @@
 <text x="888" y="764" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Большой огород, низ</text>
 <text x="681" y="650" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Яблони</text>
 <text x="1205" y="578" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Второй огород</text>
-<text x="1020" y="461" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 1</text>
-<text x="1051" y="439" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 2</text>
-<text x="1083" y="418" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 3</text>
-<text x="1114" y="395" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 4</text>
+<text x="1027" y="464" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 1</text>
+<text x="1054" y="431" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 2</text>
+<text x="1082" y="398" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 3</text>
+<text x="1109" y="365" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 4</text>
 <text x="1323" y="558" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Малина (план)</text>
 <text x="1455" y="775" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Слива и жимолость</text>
 <text x="1142" y="246" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Теплица</text>
