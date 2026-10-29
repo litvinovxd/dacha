@@ -20,9 +20,9 @@
 <polygon points="663,1030 683,1007 616,950 596,974" fill="#9fc97a" stroke="#333" stroke-width="2"/>
 <polygon points="700,1004 720,980 652,924 632,947" fill="#9fc97a" stroke="#333" stroke-width="2"/>
 <polygon points="759,979 776,959 692,888 675,909" fill="#9fc97a" stroke="#333" stroke-width="2"/>
-<polygon points="626,756 759,597 742,557 963,422 1004,457 700,819" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="626,757 768,589 713,542 875,349 1004,457 700,819" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="1005,455 1042,486 990,549 1147,681 984,875 899,804 804,917 695,825" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="631,754 573,706 732,523 769,589" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="630,753 575,707 713,542 768,589" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="1192,454 1379,710 1357,736 1283,727 1035,519" fill="#9fc97a" stroke="#333" stroke-width="2"/>
 <polygon points="1055,507 1074,485 998,421 979,443" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="1083,474 1101,452 1026,388 1007,410" fill="#f6d743" stroke="#333" stroke-width="2"/>
@@ -39,9 +39,9 @@
 <text x="639" y="990" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 3</text>
 <text x="676" y="964" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 4</text>
 <text x="725" y="934" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 5</text>
-<text x="799" y="601" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Большой огород, верх</text>
+<text x="781" y="585" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Большой огород, верх</text>
 <text x="946" y="699" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Большой огород, низ</text>
-<text x="676" y="643" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Яблони</text>
+<text x="671" y="648" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Яблони</text>
 <text x="1249" y="629" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Второй огород</text>
 <text x="1027" y="464" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 1</text>
 <text x="1054" y="431" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 2</text>
