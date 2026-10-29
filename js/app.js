@@ -114,7 +114,9 @@ function taskRow(i) {
     <button class="check${i.isDone ? ' on' : ''}" data-done="${i.key}" aria-label="Сделано">${i.isDone ? '✓' : ''}</button></div>`;
 }
 
-function cropIcon(id) { return (D.crops[id] && D.crops[id]['значок']) || '🌱'; }
+// На Windows (компьютер Ромы) нет эмодзи новее ~2019 — подставляем похожие, на телефоне остаются родные
+const WIN_ICON = /Windows/.test(navigator.userAgent) ? { '🫑': '🌶️', '🫘': '🌱', '🫐': '🍇' } : {};
+function cropIcon(id) { const ic = (D.crops[id] && D.crops[id]['значок']) || '🌱'; return WIN_ICON[ic] || ic; }
 
 function bindChecks() {
   view.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', () => {
@@ -455,6 +457,7 @@ function zona(id) {
   if (z['освещённость']) info.push(`${SUN[z['освещённость']]}, летом около ${Math.round(z['солнце_часов_в_день']['июнь'])} ч солнца в день`);
   if (info.length) h += `<div class="card">${info.join('<br>')}</div>`;
   if (z['заметки']) h += `<p>${esc(z['заметки'])}</p>`;
+  if (D.layouts['места'][id]) h += `<a class="btn" href="#/posadka/${id}">🌱 План посадки</a>`;
   for (const [year, plan] of Object.entries(D.plan).filter(([k]) => /^\d{4}$/.test(k))) {
     const p = plan['зоны'][id];
     if (!p) continue;
@@ -477,6 +480,114 @@ function zona(id) {
   for (const [y, list] of Object.entries(fromDiary)) hist.push([y, list.join(', ') + ' (из дневника)']);
   hist.sort((p, q) => q[0].localeCompare(p[0]));
   if (hist.length) h += `<h3>Что росло раньше</h3>` + hist.map(([y, t]) => `<p><b>${y}:</b> ${esc(t)}</p>`).join('');
+  return h;
+}
+
+// --- План посадки места: крупный рисованный план с рядами и расстояниями (data/layouts.json) ---
+const DENSE = 15;   // см: при меньшем расстоянии в ряду растения рисуем сплошной полосой (посев), а не по одному
+
+function posadkaSvg(L) {
+  // длинную сторону ставим вертикально — под экран телефона
+  const swap = L['ширина_м'] > L['длина_м'] * 1.15;
+  const PW = swap ? L['длина_м'] : L['ширина_м'], PH = swap ? L['ширина_м'] : L['длина_м'];
+  const px = 1.3, py = 0.6, S = 60;             // поля (м): по бокам — место под подписи размеров; единиц схемы на метр
+  const W = (PW + px * 2) * S, H = (PH + py * 2) * S;
+  const P = (x, y) => swap ? [(px + y) * S, (py + x) * S] : [(px + x) * S, (py + PH - y) * S];
+  const f = v => v.toFixed(1);
+  let o = `<svg class="plan" viewBox="0 0 ${f(W)} ${f(H)}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="План посадки">
+  <defs>
+    <pattern id="paper" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="#f4ecd8"/>
+      <circle cx="6" cy="7" r="1" fill="#e6d9bb"/><circle cx="18" cy="16" r="1.2" fill="#e9dec4"/></pattern>
+    <pattern id="earth" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#8a5a36"/>
+      <circle cx="4" cy="5" r="1.3" fill="#7a4d2c"/><circle cx="12" cy="11" r="1.1" fill="#9a6a43"/><circle cx="9" cy="2" r=".8" fill="#6f4426"/></pattern>
+    <filter id="sh" x="-5%" y="-5%" width="110%" height="115%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity=".25"/></filter>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#paper)"/>`;
+  // контур места — земля с травяной каймой
+  const outline = L['контур'].map(([x, y]) => P(x, y).map(f).join(',')).join(' ');
+  o += `<polygon points="${outline}" fill="#cfe0b0" stroke="#9fbf7a" stroke-width="${S * 0.35}" stroke-linejoin="round"/>
+    <polygon points="${outline}" fill="#d9c9a3" stroke="#b9a173" stroke-width="2"/>`;
+  L['полосы'].forEach(b => {
+    b['части'].forEach(part => {
+      const rows = part['ряды'];
+      const xs = rows.flatMap(r => r.x), sp = part['в_ряду_см'] / 100, rs = part['ряды_см'] / 100;
+      const half = Math.max(sp, 0.15) / 2 + 0.08;
+      // контур грядки — по концам рядов (у скошенного края грядка тоже скошена)
+      const sorted = [...rows].sort((A, B) => A.y - B.y);
+      const left = [], right = [];
+      sorted.forEach(r => {
+        const xa = r.x[0] - half, xb = r.x[r.x.length - 1] + half;
+        left.push([xa, r.y - rs / 2 + 0.03], [xa, r.y + rs / 2 - 0.03]);
+        right.push([xb, r.y - rs / 2 + 0.03], [xb, r.y + rs / 2 - 0.03]);
+      });
+      const bed = [...left, ...right.reverse()].map(([x, y]) => P(x, y));
+      const bxs = bed.map(q => q[0]), bys = bed.map(q => q[1]);
+      const rx = Math.min(...bxs), ry = Math.min(...bys), rw = Math.max(...bxs) - rx, rh = Math.max(...bys) - ry;
+      const x1 = Math.max(...xs) + half;
+      o += `<polygon points="${bed.map(q => q.map(f).join(',')).join(' ')}" fill="url(#earth)" stroke="#b07a45" stroke-width="5" stroke-linejoin="round" filter="url(#sh)"/>`;
+      const icon = cropIcon(part['культура']);
+      rows.forEach(r => {
+        const [lx0, ly0] = P(r.x[0] - Math.min(sp, 0.2) / 2, r.y), [lx1, ly1] = P(r.x[r.x.length - 1] + Math.min(sp, 0.2) / 2, r.y);
+        if (part['в_ряду_см'] < DENSE) {           // посев: зелёная полоса и значок через каждые ~0,6 м
+          o += `<line x1="${f(lx0)}" y1="${f(ly0)}" x2="${f(lx1)}" y2="${f(ly1)}" stroke="#6fae4f" stroke-width="${f(Math.min(rs * 0.45, 0.18) * S)}" stroke-linecap="round"/>`;
+          const every = Math.max(1, Math.round(0.6 / sp));
+          r.x.filter((_, k) => k % every === 0).forEach(x => { const [px, py] = P(x, r.y);
+            o += `<text x="${f(px)}" y="${f(py)}" font-size="${f(Math.min(rs * 0.8, 0.32) * S)}" text-anchor="middle" dominant-baseline="central">${icon}</text>`; });
+        } else {
+          o += `<line x1="${f(lx0)}" y1="${f(ly0)}" x2="${f(lx1)}" y2="${f(ly1)}" stroke="#5f3c22" stroke-width="2" stroke-dasharray="6 6" opacity=".6"/>`;
+          const fs = Math.min(sp, rs, 0.7) * S * 0.85;
+          r.x.forEach(x => { const [px, py] = P(x, r.y);
+            o += `<circle cx="${f(px)}" cy="${f(py)}" r="${f(fs * 0.5)}" fill="#6fae4f" opacity=".35"/>
+              <text x="${f(px)}" y="${f(py)}" font-size="${f(fs * 0.8)}" text-anchor="middle" dominant-baseline="central">${icon}</text>`; });
+        }
+      });
+      // табличка с названием — на верхнем краю грядки; длинное — в две строки, не влезает — первое слово
+      const full = part['что'].split(' (')[0].split(':')[0];
+      const fitFs = t => (rw - 26) / (t.length * 0.56);
+      let lines = [full];
+      if (fitFs(full) < 13) {
+        const w = full.split(' ');
+        lines = w.length > 1 ? [w.slice(0, Math.ceil(w.length / 2)).join(' '), w.slice(Math.ceil(w.length / 2)).join(' ')] : [full];
+        if (Math.min(...lines.map(fitFs)) < 9.5) lines = [w[0]];
+      }
+      const fsz = Math.max(9.5, Math.min(22, ...lines.map(fitFs)));
+      const tw = Math.min(rw - 4, Math.max(...lines.map(t => t.length)) * fsz * 0.56 + 18), th = lines.length * fsz * 1.15 + fsz * 0.45;
+      const cx = rx + rw / 2, ty = ry + th / 2 + 3;   // табличка целиком внутри грядки, не задевает подписи размеров
+      o += `<g><rect x="${f(cx - tw / 2)}" y="${f(ty - th / 2)}" width="${f(tw)}" height="${f(th)}" rx="${f(fsz * 0.5)}" fill="#2f5d2c" stroke="#e8dcb8" stroke-width="2"/>` +
+        lines.map((t, k) => `<text x="${f(cx)}" y="${f(ty + (k - (lines.length - 1) / 2) * fsz * 1.15)}" font-size="${f(fsz)}" font-weight="700" fill="#fdf8e8"
+          text-anchor="middle" dominant-baseline="central">${esc(t)}</text>`).join('') + `</g>`;
+      // размер между рядами — с той стороны грядки, где свободно (у края места, а не у соседней грядки)
+      if (rows.length > 1) {
+        const idx = b['части'].indexOf(part), last = idx === b['части'].length - 1;
+        const xEdge = last ? x1 + 0.12 : Math.min(...xs) - half - 0.12;
+        const [p1x, p1y] = P(xEdge, sorted[0].y), [p2x, p2y] = P(xEdge, sorted[1].y);
+        const lab = `${swap ? '↔' : '↕'} ${part['ряды_см']} см`;
+        const tx = (p1x + p2x) / 2 + (swap ? 0 : (last ? 8 : -8)), ty2 = (p1y + p2y) / 2 + (swap ? (last ? 16 : -8) : 0);
+        o += `<line x1="${f(p1x)}" y1="${f(p1y)}" x2="${f(p2x)}" y2="${f(p2y)}" stroke="#3b2a17" stroke-width="2.5"/>
+          <text x="${f(tx)}" y="${f(ty2)}" font-size="14" font-weight="700" fill="#3b2a17" text-anchor="${swap ? 'middle' : (last ? 'start' : 'end')}"
+            dominant-baseline="central" stroke="#f4ecd8" stroke-width="4" paint-order="stroke">${lab}</text>`;
+      }
+    });
+  });
+  return o + `</svg>`;
+}
+
+function posadka(zid) {
+  const L = D.layouts['места'][zid];
+  if (!L) return `<p>Для этого места план посадки ещё не составлен.</p>`;
+  let h = `<a class="back" href="#/zona/${zid}">← ${esc(L['название'])}</a><h2>План посадки на 2027</h2>
+    <p class="note">${esc(L['название'])}: ${Math.round(L['длина_м'])} × ${Math.round(L['ширина_м'])} м. Значок — одно растение (или кусочек ряда, если сеете семенами).</p>
+    ${posadkaSvg(L)}`;
+  L['полосы'].forEach(b => b['части'].forEach(p => {
+    const dense = p['в_ряду_см'] < DENSE;
+    const rowLen = p['ряды'].reduce((a, r) => a + (r.x[r.x.length - 1] - r.x[0]), 0);
+    h += `<div class="card plancard"><span class="pi">${cropIcon(p['культура'])}</span><div>
+      <b>${esc(p['что'])}</b><br>
+      ${dense ? `${p['рядов']} ${p['рядов'] === 1 ? 'ряд' : p['рядов'] < 5 ? 'ряда' : 'рядов'}, всего около ${Math.round(rowLen)} м — сеять семенами`
+              : `${p['растений']} ${p['растений'] % 10 === 1 && p['растений'] % 100 !== 11 ? 'растение' : 'растений'}: ${p['рядов']} ${p['рядов'] === 1 ? 'ряд' : p['рядов'] < 5 ? 'ряда' : 'рядов'}`}<br>
+      <span class="note">Между рядами ${p['ряды_см']} см, в ряду ${dense ? 'после прореживания ' : ''}${p['в_ряду_см']} см</span></div></div>`;
+  }));
+  h += `<p class="note">Расстояния — по агрономическим источникам (data/spacing.json). Если места останется больше или меньше — сажайте по тем же расстояниям.</p>`;
   return h;
 }
 
@@ -854,11 +965,11 @@ function eshche() {
 // ---------- Маршруты ----------
 function render() {
   const [, page, a, b] = (location.hash || '#/').split('/');
-  const tab = { '': 'home', uchastok: 'uchastok', zona: 'uchastok', kalendar: 'kalendar', delo: 'kalendar',
+  const tab = { '': 'home', uchastok: 'uchastok', zona: 'uchastok', posadka: 'uchastok', kalendar: 'kalendar', delo: 'kalendar',
     kultury: 'kultury', kultura: 'kultury', eshche: 'eshche', pokupki: 'eshche', chto: 'eshche', priznak: 'eshche',
     dnevnik: 'eshche', zapis: 'eshche', kopiya: 'eshche' }[page || ''] || 'home';
   document.querySelectorAll('.tabs a').forEach(x => x.classList.toggle('active', x.dataset.tab === tab));
-  const pages = { '': home, uchastok, zona: () => zona(a), kalendar: () => kalendar(a), delo: () => delo(a, b),
+  const pages = { '': home, uchastok, zona: () => zona(a), posadka: () => posadka(a), kalendar: () => kalendar(a), delo: () => delo(a, b),
     kultury, kultura: () => kultura(a), eshche, pokupki, chto: () => chto(a), priznak: () => priznak(a),
     dnevnik, zapis: () => zapis(a), kopiya };
   view.innerHTML = (pages[page || ''] || home)();
@@ -883,7 +994,7 @@ function render() {
 
 async function start() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-  const files = ['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards', 'shopping', 'symptoms', 'weather', 'push'];
+  const files = ['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards', 'shopping', 'symptoms', 'weather', 'push', 'layouts'];
   const got = await Promise.all(files.map(f => fetch(`data/${f}.json`).then(r => r.json())));
   files.forEach((f, n) => { D[f] = got[n]; });
   D.tasks = Object.fromEntries(D.calendar['дела'].map(t => [t.id, t]));

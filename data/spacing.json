@@ -1,0 +1,43 @@
+{
+ "_описание": "Схемы посадки: расстояние между рядами и между растениями в ряду, см. Где источники дают диапазон — взята середина. Используется scripts/layouts.py для планов посадки по местам.",
+ "источники": {
+  "stgau": "https://old.stgau.ru/company/personal/user/11465/files/lib/Овощеводство_Агрономия/Практика норма высева.docx (Ставропольский ГАУ, «Площадь питания, схемы посева и посадки»)",
+  "kubsau": "https://kubsau.ru/upload/iblock/a80/a80353a81ace1b3d4188a469a46d3ca2.pdf (Кубанский ГАУ, лекция)",
+  "aif_teplitsa": "https://aif.ru/dacha/11063 — растений на 1 м² в теплице",
+  "halva_baklazhan": "https://media.halvacard.ru/dacha/kak-vyrashhivat-baklazany-dlia-bogatogo-urozaia-iz-semian-v-teplice-otkrytom-grunte",
+  "socialkirov": "https://socialkirov.ru/files/Выращивание чеснока, лука, картошки.pdf",
+  "e1_korneplody": "https://www.e1.ru/text/spring/2023/05/27/72339197/",
+  "sotki_prorezhivanie": "https://www.sotki.ru/sad_ogorod/article/vremya-prorezhivaniya-skolko-rasteniy-ostavlyat-na-4627",
+  "osnmedia_arbuz": "https://www.osnmedia.ru/instrukcii/instruktsiya-kak-vyrashhivat-arbuzy-v-srednej-polose/",
+  "engage_kabachok": "https://engage.org.ua/ru/?p=13877 (по данным Virginia Tech)",
+  "telegraf_kukuruza": "https://news.telegraf.com.ua/obshhestvo/2025-04-26/5906956-sdelayte-eti-pyat-shagov-i-kukuruza-zavalit-vas-urozhaem-prostaya-skhema",
+  "netfreedom_goroh": "https://netfreedom.org.ua/ru/yak-pravylno-siyaty-goroh-povnyj-posibnyk-dlya-ryasnogo-vrozhayu/",
+  "tatarstan_fasol": "https://agro.tatarstan.ru/file/pub/pub_29143.doc",
+  "malina_lenta": "https://elib.ggau.by/bitstream/123456789/11704/1/44-52.pdf (ленточная схема 3,5 × 0,5 м)"
+ },
+ "схемы": {
+  "kartofel":          {"ряды": 70, "в_ряду": 30, "источник": "kubsau (ряды 70), socialkirov (25–35 в ряду)"},
+  "kapusta-rannyaya":  {"ряды": 60, "в_ряду": 60, "источник": "stgau: 60×60 для ранней и средней"},
+  "kapusta-pozdnyaya": {"ряды": 70, "в_ряду": 70, "источник": "stgau: 70×70 для поздней"},
+  "kapusta-tsvetnaya": {"ряды": 60, "в_ряду": 60, "источник": "stgau: 60×60 для цветной"},
+  "kapusta-brokkoli":  {"ряды": 60, "в_ряду": 60, "источник": "как цветная (stgau)", "проверено": false},
+  "morkov":            {"ряды": 25, "в_ряду": 5, "источник": "e1_korneplody (ряды 25–30), прореживание до 5–8 см"},
+  "svekla":            {"ряды": 30, "в_ряду": 10, "источник": "e1_korneplody (ряды 30–35), sotki_prorezhivanie (до 8–10 см)"},
+  "luk":               {"ряды": 25, "в_ряду": 10, "источник": "socialkirov: 20–30 × 8–15"},
+  "chesnok":           {"ряды": 25, "в_ряду": 10, "источник": "socialkirov: 20–30 × 8–15"},
+  "goroh":             {"ряды": 45, "в_ряду": 7, "источник": "netfreedom_goroh: 40–60 × 5–10"},
+  "fasol":             {"ряды": 40, "в_ряду": 12, "источник": "tatarstan_fasol: 35–40 × 10–15"},
+  "kukuruza":          {"ряды": 60, "в_ряду": 30, "источник": "telegraf_kukuruza: ряды от 50, растения от 25; сажать блоком из нескольких рядов"},
+  "kabachok":          {"ряды": 100, "в_ряду": 80, "источник": "engage_kabachok: 60–90 в ряду, 90–150 между рядами"},
+  "arbuz":             {"ряды": 150, "в_ряду": 100, "источник": "osnmedia_arbuz: 70–140 в ряду, 1,5 м между рядами"},
+  "tomat-teplitsa":    {"ряды": 60, "в_ряду": 40, "источник": "aif_teplitsa: невысоким 3–4 куста на 1 м² теплицы — 2 ряда на грядке 1,2 м"},
+  "tomat-vysokiy":     {"ряды": 60, "в_ряду": 55, "источник": "aif_teplitsa: высоким 2–3 куста на 1 м²"},
+  "perets":            {"ряды": 60, "в_ряду": 40, "источник": "aif_teplitsa: 3–5 на 1 м²"},
+  "baklazhan":         {"ряды": 60, "в_ряду": 50, "источник": "halva_baklazhan: 60–80 × 45–60"},
+  "ogurets":           {"ряды": 60, "в_ряду": 60, "источник": "aif_teplitsa: 2–3 растения на 1 м²"},
+  "malina":            {"ряды": 100, "в_ряду": 50, "источник": "malina_lenta: ленточная схема, 50 см в ряду"},
+  "zelen":             {"ряды": 20, "в_ряду": 5, "источник": "укроп — рядки 20 см (e1_korneplody); густота — по всходам", "проверено": false},
+  "salat":             {"ряды": 25, "в_ряду": 20, "источник": "уточнить", "проверено": false},
+  "redis":             {"ряды": 15, "в_ряду": 3, "источник": "уточнить", "проверено": false}
+ }
+}

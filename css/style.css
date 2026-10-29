@@ -154,3 +154,8 @@ label.card { display: block; }
   font-size: min(0.85rem, 4.4vw);   /* при крупном шрифте подпись уменьшается под ширину кнопки, а не разрывается */
   text-decoration: none; text-align: center; white-space: nowrap; }
 .kinds .ki { font-size: 1.6rem; line-height: 1; }
+
+/* План посадки места */
+.plan { width: 100%; max-width: 560px; height: auto; display: block; margin: 8px auto; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+.plancard { display: flex; gap: 12px; align-items: flex-start; }
+.plancard .pi { font-size: 1.8rem; line-height: 1.2; }
