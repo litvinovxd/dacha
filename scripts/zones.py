@@ -1,7 +1,7 @@
 """Зоны участка: контуры по снимку, расчёт солнца/тени, схема.
 
 Запуск:  python scripts/zones.py
-Читает data/zones_src.json (контуры в пикселях снимка materials/uchastok.png и деревья),
+Читает data/zones_src.json (контуры в пикселях снимка (materials/uchastok-rovno.png) и деревья),
 пишет data/zones.json (метры, площади, часы солнца) и materials/skhema.svg + materials/skhema.png.
 """
 import json
@@ -16,9 +16,13 @@ PX_PER_M = SRC["пикселей_на_метр"]
 OX, OY = SRC["начало_координат_px"]
 
 
+UP = math.radians(SRC.get("азимут_верха_снимка", 0))   # снимок может быть повёрнут: куда смотрит его верх
+
+
 def to_m(px, py):
     """Пиксели снимка -> метры (x на восток, y на север)."""
-    return ((px - OX) / PX_PER_M, (OY - py) / PX_PER_M)
+    r, u = (px - OX) / PX_PER_M, (OY - py) / PX_PER_M          # вправо и вверх по снимку
+    return (r * math.cos(UP) + u * math.sin(UP), -r * math.sin(UP) + u * math.cos(UP))
 
 
 def rect(cx, cy, length, width, azimuth):

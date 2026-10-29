@@ -1,54 +1,51 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1742 1216" font-family="sans-serif">
-<rect width="1742" height="1216" fill="#f4f1ea"/>
-<polygon points="1116,44 1260,171 1376,337 1698,742 1500,974 1293,759 598,1172 391,1007 44,585 143,494 209,535 276,510 342,362 474,279 697,113 855,292 970,213" fill="#e8e2d4" stroke="#7a6f5c" stroke-width="3" stroke-dasharray="12 8"/>
-<circle cx="1045" cy="759" r="99" fill="#2f5d3a" opacity="0.35"/>
-<circle cx="1235" cy="841" r="124" fill="#2f5d3a" opacity="0.35"/>
-<circle cx="1400" cy="957" r="116" fill="#2f5d3a" opacity="0.35"/>
-<circle cx="1599" cy="726" r="149" fill="#2f5d3a" opacity="0.35"/>
-<circle cx="1847" cy="494" r="232" fill="#2f5d3a" opacity="0.35"/>
-<circle cx="2046" cy="858" r="265" fill="#2f5d3a" opacity="0.35"/>
-<circle cx="1797" cy="1122" r="198" fill="#2f5d3a" opacity="0.35"/>
-<circle cx="855" cy="1106" r="99" fill="#2f5d3a" opacity="0.35"/>
-<circle cx="1963" cy="113" r="248" fill="#2f5d3a" opacity="0.35"/>
-<circle cx="110" cy="726" r="132" fill="#2f5d3a" opacity="0.35"/>
-<circle cx="242" cy="1089" r="116" fill="#2f5d3a" opacity="0.35"/>
-<polygon points="579,308 701,200 843,361 721,468" fill="#c0504d" stroke="#333" stroke-width="2"/>
-<polygon points="393,385 401,439 441,498 475,537 612,455 594,402 539,301 442,345" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="582,498 572,479 502,516 512,536" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="617,931 637,907 569,851 550,874" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="584,974 604,950 536,894 516,917" fill="#9fc97a" stroke="#333" stroke-width="2"/>
-<polygon points="663,1030 683,1007 616,950 596,974" fill="#9fc97a" stroke="#333" stroke-width="2"/>
-<polygon points="700,1004 720,980 652,924 632,947" fill="#9fc97a" stroke="#333" stroke-width="2"/>
-<polygon points="759,979 776,959 692,888 675,909" fill="#9fc97a" stroke="#333" stroke-width="2"/>
-<polygon points="626,757 768,589 713,542 875,349 1004,457 700,819" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="1005,455 1042,486 990,549 1147,681 984,875 899,804 804,917 695,825" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="630,753 575,707 713,542 768,589" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="1192,454 1379,710 1357,736 1283,727 1035,519" fill="#9fc97a" stroke="#333" stroke-width="2"/>
-<polygon points="1055,507 1074,485 998,421 979,443" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="1083,474 1101,452 1026,388 1007,410" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="1110,441 1129,419 1053,355 1035,377" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="1138,408 1156,386 1081,322 1062,344" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="1379,655 1397,642 1266,462 1248,475" fill="#9fc97a" stroke="#333" stroke-width="2"/>
-<polygon points="1307,795 1438,640 1697,741 1509,965" fill="#5f8f6b" stroke="#333" stroke-width="2"/>
-<polygon points="1188,330 1244,262 1143,177 1086,245" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<text x="711" y="334" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Дом</text>
-<text x="487" y="420" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Клумбы из покрышек</text>
-<text x="542" y="507" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Длинная клумба</text>
-<text x="593" y="891" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 1</text>
-<text x="560" y="934" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 2</text>
-<text x="639" y="990" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 3</text>
-<text x="676" y="964" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 4</text>
-<text x="725" y="934" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 5</text>
-<text x="781" y="585" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Большой огород, верх</text>
-<text x="946" y="699" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Большой огород, низ</text>
-<text x="671" y="648" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Яблони</text>
-<text x="1249" y="629" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Второй огород</text>
-<text x="1027" y="464" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 1</text>
-<text x="1054" y="431" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 2</text>
-<text x="1082" y="398" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 3</text>
-<text x="1109" y="365" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 4</text>
-<text x="1323" y="558" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Малина (план)</text>
-<text x="1488" y="785" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Слива и жимолость</text>
-<text x="1165" y="253" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Теплица</text>
-<text x="1702" y="50" font-size="30" text-anchor="middle">С ↑</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1783 1323" font-family="sans-serif">
+<rect width="1783" height="1323" fill="#f4f1ea"/>
+<polygon points="44,783 150,656 204,701 611,195 790,345 1031,44 1740,638 1559,893 1329,713 699,1261 646,1280" fill="#e8e2d4" stroke="#7a6f5c" stroke-width="3" stroke-dasharray="12 8"/>
+<circle cx="1059" cy="732" r="74" fill="#2f5d3a" opacity="0.35"/>
+<circle cx="1304" cy="959" r="165" fill="#2f5d3a" opacity="0.35"/>
+<circle cx="1104" cy="1094" r="124" fill="#2f5d3a" opacity="0.35"/>
+<circle cx="928" cy="1227" r="99" fill="#2f5d3a" opacity="0.35"/>
+<circle cx="1563" cy="702" r="116" fill="#2f5d3a" opacity="0.35"/>
+<circle cx="1368" cy="214" r="116" fill="#2f5d3a" opacity="0.35"/>
+<circle cx="1171" cy="38" r="99" fill="#2f5d3a" opacity="0.35"/>
+<circle cx="1621" cy="427" r="116" fill="#2f5d3a" opacity="0.35"/>
+<polygon points="510,418 625,281 789,420 675,557" fill="#c0504d" stroke="#333" stroke-width="2"/>
+<polygon points="382,548 472,440 564,518 474,626" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="494,638 554,567 569,580 509,651" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="677,1032 696,1008 629,952 609,975" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="648,1066 668,1042 600,986 581,1009" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="735,1126 755,1103 688,1046 668,1070" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="772,1099 792,1075 724,1018 704,1042" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="820,1058 837,1038 752,967 735,988" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="657,825 773,686 734,654 910,443 1003,521 710,869" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="710,869 977,551 1167,711 1016,891 946,832 831,970" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="616,791 732,653 773,686 657,825" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1044,551 1142,435 1383,637 1331,697 1300,671 1190,673" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1022,523 1040,501 965,438 946,460" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1047,493 1066,471 990,407 972,429" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1077,457 1096,436 1020,372 1001,394" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1105,424 1123,403 1047,339 1029,361" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1219,456 1234,439 1417,593 1403,610" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<polygon points="1343,707 1532,482 1735,652 1546,877" fill="#9fc97a" stroke="#333" stroke-width="2"/>
+<polygon points="1029,240 1086,172 1187,257 1130,325" fill="#f6d743" stroke="#333" stroke-width="2"/>
+<text x="650" y="419" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Дом</text>
+<text x="473" y="533" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Клумбы из покрышек</text>
+<text x="531" y="609" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Длинная клумба</text>
+<text x="653" y="992" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 1</text>
+<text x="624" y="1026" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 2</text>
+<text x="712" y="1086" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 3</text>
+<text x="748" y="1059" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 4</text>
+<text x="786" y="1013" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у теплицы 5</text>
+<text x="798" y="666" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Большой огород, верх</text>
+<text x="941" y="804" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Большой огород, низ</text>
+<text x="695" y="739" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Яблони</text>
+<text x="1232" y="611" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Второй огород</text>
+<text x="993" y="481" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 1</text>
+<text x="1019" y="450" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 2</text>
+<text x="1049" y="415" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 3</text>
+<text x="1076" y="382" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 4</text>
+<text x="1318" y="524" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Малина (план)</text>
+<text x="1539" y="679" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Слива и жимолость</text>
+<text x="1108" y="249" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Теплица</text>
+<text x="1743" y="50" font-size="30" text-anchor="middle">С ↑</text>
 </svg>
