@@ -23,7 +23,7 @@
 <polygon points="626,756 759,597 742,557 963,422 1004,457 700,819" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="1005,455 1042,486 990,549 1147,681 984,875 899,804 804,917 695,825" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="631,754 573,706 732,523 769,589" fill="#f6d743" stroke="#333" stroke-width="2"/>
-<polygon points="982,541 1182,457 1196,482 1388,642 1314,731 1189,715" fill="#9fc97a" stroke="#333" stroke-width="2"/>
+<polygon points="1192,454 1379,710 1357,736 1283,727 1035,519" fill="#9fc97a" stroke="#333" stroke-width="2"/>
 <polygon points="1055,507 1074,485 998,421 979,443" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="1083,474 1101,452 1026,388 1007,410" fill="#f6d743" stroke="#333" stroke-width="2"/>
 <polygon points="1110,441 1129,419 1053,355 1035,377" fill="#f6d743" stroke="#333" stroke-width="2"/>
@@ -42,7 +42,7 @@
 <text x="799" y="601" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Большой огород, верх</text>
 <text x="946" y="699" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Большой огород, низ</text>
 <text x="676" y="643" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Яблони</text>
-<text x="1208" y="595" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Второй огород</text>
+<text x="1249" y="629" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Второй огород</text>
 <text x="1027" y="464" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 1</text>
 <text x="1054" y="431" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 2</text>
 <text x="1082" y="398" font-size="22" text-anchor="middle" fill="#111" stroke="#fff" stroke-width="5" paint-order="stroke">Парник у второго огорода 3</text>

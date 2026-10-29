@@ -325,10 +325,10 @@ function mapSvg(activeId) {
 
   zs.forEach(z => {
     const look = ID_LOOK[z.id] || ZONE_LOOK[z['тип']] || { fill: '#ddd' };
-    const on = z.id === activeId, plan = z['тип'] === 'план';
+    const plan = z['тип'] === 'план';
     o += `<a href="#/zona/${z.id}" class="zone"><polygon points="${pts(z['контур_м'])}" fill="${look.fill}"
-      fill-opacity="${look.opacity || 1}" stroke="${on ? '#ff7a00' : ID_LOOK[z.id] ? '#3c7fa8' : plan ? '#d9467a' : 'rgba(60,45,30,.55)'}"
-      stroke-width="${on ? 6 : 1.5}" ${plan ? 'stroke-dasharray="8 5"' : ''} filter="url(#shadow)"/>`;
+      fill-opacity="${look.opacity || 1}" stroke="${ID_LOOK[z.id] ? '#3c7fa8' : plan ? '#d9467a' : 'rgba(60,45,30,.55)'}"
+      stroke-width="1.5" ${plan ? 'stroke-dasharray="8 5"' : ''} filter="url(#shadow)"/>`;
     const [cx, cy] = center(z['контур_м']);
     if (z['тип'] === 'дом') {   // конёк крыши
       const q = z['контур_м'].map(R);
@@ -352,16 +352,22 @@ function mapSvg(activeId) {
         o += `<circle cx="${X(cx + dx)}" cy="${Y(cy + dy)}" r="14" fill="#4f8a3e" stroke="#2f5a2c" stroke-width="2"/>`;
       }
     }
-    if (z['тип'] === 'сад') {   // яблони: 4 кроны вдоль длинной стороны участка
-      const q = z['контур_м'].map(R);
-      let far = [q[0], q[1]], best = 0;
-      q.forEach(a => q.forEach(b => { const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (d > best) { best = d; far = [a, b]; } }));
-      [0.2, 0.4, 0.6, 0.8].forEach(t => {
-        const tx = cx + (far[0][0] + (far[1][0] - far[0][0]) * t - cx) * 0.6, ty = cy + (far[0][1] + (far[1][1] - far[0][1]) * t - cy) * 0.6;
-        o += `<circle cx="${X(tx)}" cy="${Y(ty)}" r="10" fill="#5c9a45" stroke="#2f5a2c" stroke-width="1.5"/>
-          <circle cx="${(+X(tx) - 3).toFixed(1)}" cy="${(+Y(ty) - 2).toFixed(1)}" r="2.2" fill="#d6372b"/>
-          <circle cx="${(+X(tx) + 3.5).toFixed(1)}" cy="${(+Y(ty) + 3).toFixed(1)}" r="2.2" fill="#d6372b"/>`;
-      });
+    if (z['тип'] === 'сад') {   // 4 яблони ровно в ряд вдоль участка, с равным шагом, кроны не касаются
+      const q = z['контур_м'];
+      const ext = az => { const u = [Math.sin(az * Math.PI / 180), Math.cos(az * Math.PI / 180)];
+        const t = q.map(p => p[0] * u[0] + p[1] * u[1]); return [u, Math.min(...t), Math.max(...t)]; };
+      const g = Z['азимут_грядок'] || 130;
+      const [u, t0, t1] = [ext(g), ext(g - 90)].sort((A, B) => (B[2] - B[1]) - (A[2] - A[1]))[0];   // вдоль длинной стороны
+      const n = [u[1], -u[0]], c0 = q.reduce((A, p) => [A[0] + p[0] / q.length, A[1] + p[1] / q.length], [0, 0]);
+      const s0 = c0[0] * n[0] + c0[1] * n[1], step = (t1 - t0) / 4;
+      const r = Math.min(10, step * S / 2 - 3);
+      for (let k = 0; k < 4; k++) {
+        const t = t0 + step * (k + 0.5);
+        const [tx, ty] = R([u[0] * t + n[0] * s0, u[1] * t + n[1] * s0]);
+        o += `<circle cx="${X(tx)}" cy="${Y(ty)}" r="${r.toFixed(1)}" fill="#5c9a45" stroke="#2f5a2c" stroke-width="1.5"/>
+          <circle cx="${(+X(tx) - r * 0.3).toFixed(1)}" cy="${(+Y(ty) - r * 0.2).toFixed(1)}" r="${(r * 0.22).toFixed(1)}" fill="#d6372b"/>
+          <circle cx="${(+X(tx) + r * 0.35).toFixed(1)}" cy="${(+Y(ty) + r * 0.3).toFixed(1)}" r="${(r * 0.22).toFixed(1)}" fill="#d6372b"/>`;
+      }
     }
     o += `</a>`;
   });
@@ -370,10 +376,10 @@ function mapSvg(activeId) {
   const line = pl => pl.map(R).map(([x, y]) => `${X(x)},${Y(y)}`).join(' ');
   for (const g of Z['промежутки_м'] || []) {
     o += `<polyline points="${line(g['линия'])}" fill="none" stroke="#dde9c8" stroke-width="${(g['ширина_м'] * S).toFixed(0)}"
-      stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`;
+      stroke-linecap="butt" stroke-linejoin="miter" pointer-events="none"/>`;
   }
   for (const t of Z['тропинки_м'] || []) {
-    o += `<polyline points="${line(t)}" fill="none" stroke="#efe3c2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`;
+    o += `<polyline points="${line(t)}" fill="none" stroke="#efe3c2" stroke-width="7" stroke-linecap="butt" stroke-linejoin="miter" pointer-events="none"/>`;
   }
 
   // подписи: название на светлой плашке (длинное — в две строки), если помещается внутри места; иначе маленький номер
@@ -409,6 +415,10 @@ function mapSvg(activeId) {
         <text x="${X(cx)}" y="${(+Y(cy) + 0.5).toFixed(1)}" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#1d1d1d">${n + 1}</text></g>`;
     }
   });
+
+  // выбранное место — оранжевая рамка поверх тропинок и соседей
+  const act = zs.find(z => z.id === activeId);
+  if (act) o += `<polygon points="${pts(act['контур_м'])}" fill="none" stroke="#ff7a00" stroke-width="5" stroke-linejoin="round" pointer-events="none"/>`;
 
   // стрелка на север
   const [nx, ny] = R([0, 1]);
