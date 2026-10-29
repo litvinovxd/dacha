@@ -267,14 +267,14 @@ const ZONE_LOOK = {   // заливка на схеме и цвет метки �
   'дом': { fill: '#b5483f', chip: '#b5483f' }, 'теплица': { fill: 'url(#glass)', chip: '#9ccbe3' },
   'парник': { fill: 'url(#hoops)', chip: '#e8ece4' }, 'огород': { fill: 'url(#soil)', chip: '#8b5e3c' },
   'клумба': { fill: '#9fcf7f', chip: '#e66a9a' }, 'ягодник': { fill: '#8dbb6e', chip: '#5d8f4a' },
-  'план': { fill: 'url(#plan)', chip: '#d9467a' },
+  'план': { fill: 'url(#plan)', chip: '#d9467a' }, 'сад': { fill: '#b7d99a', chip: '#6aa84f' },
 };
-// отдельный вид для конкретных мест (будущая теплица — «стекло» пунктиром)
-const ID_LOOK = { 'teplitsa-novaya': { fill: 'url(#glass)', chip: '#9ccbe3', dashed: true, opacity: 0.6 } };
-const SHORT = { dom: 'Дом', klumba: 'Цветник', teplitsa: 'Теплица', 'teplitsa-novaya': 'Новая теплица', 'ogorod-bolshoy-verh': 'Огород, верх',
+// отдельный вид для конкретных мест (если понадобится выделить что-то особо)
+const ID_LOOK = {};
+const SHORT = { dom: 'Дом', klumba: 'Цветник', 'teplitsa-novaya': 'Теплица', yabloni: 'Яблони', 'ogorod-bolshoy-verh': 'Огород, верх',
   'ogorod-bolshoy-niz': 'Огород, низ', 'ogorod-vtoroy': 'Второй огород', 'sliva-zhimolost': 'Слива, жимолость' };
 // сдвиг подписи на схеме (в метрах: вправо, вверх), чтобы не наезжала на соседей
-const LABEL_SHIFT = { teplitsa: [0, 4], 'teplitsa-novaya': [-3.5, 4.5], 'ogorod-bolshoy-verh': [-2.5, 1.5], klumba: [0, 4.6] };
+const LABEL_SHIFT = { 'teplitsa-novaya': [-3.5, 4.5], yabloni: [-0.5, 2.2], 'ogorod-bolshoy-verh': [-2.2, -0.6], klumba: [0, 4.6] };
 
 function mapSvg(activeId) {
   const Z = D.zones, zs = Z['зоны'];
@@ -334,13 +334,10 @@ function mapSvg(activeId) {
       o += `<line x1="${X(m1[0])}" y1="${Y(m1[1])}" x2="${X(m2[0])}" y2="${Y(m2[1])}" stroke="#7e2b25" stroke-width="4"/>`;
     }
     const colors = ['#e66a9a', '#f2c230', '#c75bd6', '#f08a3c'];
-    if (z.id === 'klumba') {   // 12 клумб-покрышек по кругу
-      const q = z['контур_м'].map(R);
-      const rad = q.reduce((a, p) => a + Math.hypot(p[0] - cx, p[1] - cy), 0) / q.length * 0.78;
-      for (let k = 0; k < 12; k++) {
-        const ang = 2 * Math.PI * k / 12, px = cx + rad * Math.cos(ang), py = cy + rad * Math.sin(ang);
-        o += `<circle cx="${X(px)}" cy="${Y(py)}" r="7" fill="${colors[k % 4]}" stroke="#333" stroke-width="3.5"/>`;
-      }
+    if (z['покрышки_м']) {   // клумбы-покрышки — там, где они стоят на самом деле
+      z['покрышки_м'].map(R).forEach(([px, py], k) => {
+        o += `<circle cx="${X(px)}" cy="${Y(py)}" r="8" fill="${colors[k % 4]}" stroke="#333" stroke-width="3.5"/>`;
+      });
     } else if (z['тип'] === 'клумба') {   // обычная клумба — цветы точками
       const q = z['контур_м'].map(R);
       for (let k = 1; k < 6; k++) {
@@ -353,8 +350,26 @@ function mapSvg(activeId) {
         o += `<circle cx="${X(cx + dx)}" cy="${Y(cy + dy)}" r="14" fill="#4f8a3e" stroke="#2f5a2c" stroke-width="2"/>`;
       }
     }
+    if (z['тип'] === 'сад') {   // яблони: кроны с яблоками
+      z['контур_м'].map(R).filter((_, k) => k % 2 === 0).forEach(([vx, vy]) => {
+        const tx = cx + (vx - cx) * 0.5, ty = cy + (vy - cy) * 0.5;
+        o += `<circle cx="${X(tx)}" cy="${Y(ty)}" r="15" fill="#5c9a45" stroke="#2f5a2c" stroke-width="2"/>
+          <circle cx="${(+X(tx) - 5).toFixed(1)}" cy="${(+Y(ty) - 3).toFixed(1)}" r="3" fill="#d6372b"/>
+          <circle cx="${(+X(tx) + 5).toFixed(1)}" cy="${(+Y(ty) + 4).toFixed(1)}" r="3" fill="#d6372b"/>`;
+      });
+    }
     o += `</a>`;
   });
+
+  // промежутки между огородами (трава) и тропинки
+  const line = pl => pl.map(R).map(([x, y]) => `${X(x)},${Y(y)}`).join(' ');
+  for (const g of Z['промежутки_м'] || []) {
+    o += `<polyline points="${line(g['линия'])}" fill="none" stroke="#dde9c8" stroke-width="${(g['ширина_м'] * S).toFixed(0)}"
+      stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`;
+  }
+  for (const t of Z['тропинки_м'] || []) {
+    o += `<polyline points="${line(t)}" fill="none" stroke="#efe3c2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`;
+  }
 
   // подписи: крупным местам — название, мелким — номер в кружке (как в списке под схемой)
   zs.forEach((z, n) => {

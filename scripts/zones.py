@@ -125,7 +125,9 @@ def grade(h):
 
 zones = []
 for z in SRC["зоны"]:
-    if "контур_px" in z:
+    if "контур_м" in z:          # контур уже в метрах (правки по рисунку на схеме)
+        poly = [tuple(p) for p in z["контур_м"]]
+    elif "контур_px" in z:
         poly = [to_m(*p) for p in z["контур_px"]]
     else:
         poly = rect(*z["центр_px"], z["длина_м"], z["ширина_м"], z.get("азимут", SRC["азимут_грядок"]))
@@ -141,6 +143,7 @@ for z in SRC["зоны"]:
         "история": z.get("история", {}),
         "заметки": z.get("заметки", ""),
         "проверено": z.get("проверено", False),
+        **({"покрышки_м": z["покрышки_м"]} if "покрышки_м" in z else {}),
     })
 
 BORDER = [to_m(*p) for p in SRC["граница_px"]]
@@ -162,6 +165,8 @@ TURN = SRC.get("поворот_схемы_град", round(AXIS - 90, 1))       
     "зоны": zones,
     "деревья_м": [[round(x, 1), round(y, 1), round(r, 1)] for x, y, r, _ in TREES],
     "граница_м": [[round(x, 2), round(y, 2)] for x, y in BORDER],
+    "тропинки_м": SRC.get("тропинки_м", []),
+    "промежутки_м": SRC.get("промежутки_м", []),
     "поворот_схемы_град": TURN,
     "азимут_грядок": SRC["азимут_грядок"],
 }, ensure_ascii=False, indent=1), encoding="utf-8")
