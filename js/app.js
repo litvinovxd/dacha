@@ -108,10 +108,12 @@ function taskRow(i) {
     : i.task['повтор'] ? `${fmt(i.due)}, потом каждые ${i.task['повтор']} дн.`
     : fmtRange(i.due < i.start ? i.start : i.due, i.end);
   return `<div class="task${late ? ' late' : ''}${i.isDone ? ' done' : ''}">
-    <button class="check${i.isDone ? ' on' : ''}" data-done="${i.key}" aria-label="Сделано">${i.isDone ? '✓' : ''}</button>
-    <a class="txt" href="#/delo/${i.year}/${i.task.id}" style="color:inherit;text-decoration:none">
-      <div>${esc(i.task['что'])}</div><div class="when">${when}</div></a></div>`;
+    <span class="lead" aria-hidden="true">${cropIcon(i.task['культура'])}</span>
+    <a class="txt" href="#/delo/${i.year}/${i.task.id}"><div>${esc(i.task['что'])}</div><div class="when">${i.isDone && i.last ? 'Сделано ' + fmt(i.last) : when}</div></a>
+    <button class="check${i.isDone ? ' on' : ''}" data-done="${i.key}" aria-label="Сделано">${i.isDone ? '✓' : ''}</button></div>`;
 }
+
+function cropIcon(id) { return (D.crops[id] && D.crops[id]['значок']) || '🌱'; }
 
 function bindChecks() {
   view.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', () => {
@@ -162,8 +164,21 @@ async function loadForecast() {
 // Предупреждения — наверху главной, таблица прогноза — внизу
 function weatherAlerts() {
   if (!forecast) return '';
-  return Weather.hints(forecast.daily, weatherCfg(), iso(today()))
-    .map(x => `<div class="alert${x['важно'] ? '' : ' soft'}">${esc(x['текст'])}</div>`).join('');
+  return Weather.hints(forecast.daily, weatherCfg(), iso(today())).map(x => {
+    const [icon, title] = ALERT_LOOK[x['вид']] || ['⚠️', 'Внимание'];
+    return `<div class="alert${x['важно'] ? '' : ' soft'}"><span class="ai">${icon}</span><div><b>${title}</b>${esc(x['текст'])}</div></div>`;
+  }).join('');
+}
+
+const ALERT_LOOK = { 'заморозок': ['❄️', 'Заморозок'], 'жара': ['🌡️', 'Жара'], 'ливень': ['🌧️', 'Сильный дождь'],
+  'сухо': ['☀️', 'Сухо'], 'фитофтора': ['🍂', 'Риск фитофторы'] };
+
+// Значок погоды по коду WMO из прогноза
+function skyIcon(code) {
+  for (const [max, ic] of [[0, '☀️'], [2, '🌤️'], [3, '☁️'], [48, '🌫️'], [67, '🌧️'], [77, '🌨️'], [82, '🌧️'], [86, '🌨️'], [99, '⛈️']]) {
+    if (code <= max) return ic;
+  }
+  return '☁️';
 }
 
 function weatherBlock() {
@@ -171,11 +186,15 @@ function weatherBlock() {
   const d = forecast.daily, t = iso(today());
   let h = '';
   const i0 = Math.max(0, d.time.indexOf(t));
+  const P = weatherCfg()['пороги'];
+  const deg = v => `${v > 0 ? '+' : ''}${Math.round(v)}°`;
   h += `<div class="wx">` + d.time.slice(i0, i0 + 7).map((day, k) => {
-    const i = i0 + k, dt = parse(day);
-    const rain = d.precipitation_sum[i] >= 1 ? `, ${Math.round(d.precipitation_sum[i])} мм` : '';
-    return `<div class="wxrow"><b>${k === 0 ? 'Сегодня' : k === 1 ? 'Завтра' : WEEKDAYS[dt.getDay()] + ' ' + dt.getDate()}</b>
-      <span>ночью ${Math.round(d.temperature_2m_min[i])}°, днём ${Math.round(d.temperature_2m_max[i])}°, ${Weather.sky(d.weather_code[i])}${rain}</span></div>`;
+    const i = i0 + k, dt = parse(day), min = d.temperature_2m_min[i], max = d.temperature_2m_max[i];
+    const warn = (min <= P['заморозок_ночью_до'] && max > 0) || max >= P['жара_днём_от'];
+    const rain = d.precipitation_sum[i] >= 1 ? `<div class="r">${Math.round(d.precipitation_sum[i])} мм</div>` : '';
+    return `<div class="day${warn ? ' warn' : ''}"><div class="d">${k === 0 ? 'Сегодня' : k === 1 ? 'Завтра' : WEEKDAYS[dt.getDay()] + ' ' + dt.getDate()}</div>
+      <div class="e" title="${Weather.sky(d.weather_code[i])}">${skyIcon(d.weather_code[i])}</div>
+      <div class="x">${deg(max)}</div><div class="n">ночью ${deg(min)}</div>${rain}</div>`;
   }).join('') + `</div>`;
   const ago = Math.round((Date.now() - new Date(forecast.got).getTime()) / 3600000);
   if (ago >= 6) h += `<p class="note">Прогноз обновлён ${ago} ч назад — нет интернета?</p>`;
@@ -188,11 +207,11 @@ function home() {
   h += now.length ? now.map(taskRow).join('') : `<p class="empty">На этой неделе дел по календарю нет.</p>`;
   if (soon.length) h += `<h2>Скоро</h2>` + soon.map(taskRow).join('');
   const toBuy = shopItems(shopYear()).filter(i => !i.has && i.order <= addDays(today(), 14));
-  if (toBuy.length) h += `<a class="btn second" href="#/pokupki">🛒 Пора купить или заказать: ${toBuy.length}</a>`;
+  if (toBuy.length) h += `<a class="chip" href="#/pokupki">🛒 Пора купить или заказать: ${toBuy.length}</a>`;
+  h += `<h2>Погода</h2>${weatherBlock()}`;
   if (load('dacha.moon', false)) h += moonBlock();
-  h += `<p class="note">Нажмите на дело, чтобы прочитать, как его сделать. Квадратик — отметить «Сделано».</p>
-    <a class="btn second" href="#/dnevnik">📖 Записать в дневник</a>
-    <h2>Погода на неделю</h2>${weatherBlock()}`;
+  h += `<p class="note">Нажмите на дело — откроется подсказка. Квадратик справа — «Сделано».</p>
+    <a class="fab" href="#/dnevnik">✎ В дневник</a>`;
   return h;
 }
 
@@ -473,12 +492,14 @@ function shopRow(i) {
   const t = today();
   const late = !i.has && i.order < t;
   const how = i.p['доставка'] === 'почта' ? 'заказать до' : 'купить до';
+  const icon = i.p['сорта_культуры'] ? cropIcon(i.p['сорта_культуры'].split(',')[0]) : '🛒';
   return `<div class="task${late ? ' late' : ''}${i.has ? ' done' : ''}">
-    <button class="check${i.has ? ' on' : ''}" data-have="${i.key}" aria-label="Уже есть">${i.has ? '✓' : ''}</button>
+    <span class="lead" aria-hidden="true">${icon}</span>
     <div class="txt"><div>${esc(i.p['что'])}</div>
     <div class="when">${late ? 'Пора! ' : ''}${how} ${fmt(i.order)} · нужно к ${fmt(i.need)}</div>
     ${i.p['сорта_культуры'] ? `<div class="note">Сорта: ${varietyLine(i.p['сорта_культуры'])}</div>` : ''}
-    ${i.p['примечание'] ? `<div class="note">${esc(i.p['примечание'])}</div>` : ''}</div></div>`;
+    ${i.p['примечание'] ? `<div class="note">${esc(i.p['примечание'])}</div>` : ''}</div>
+    <button class="check${i.has ? ' on' : ''}" data-have="${i.key}" aria-label="Уже есть">${i.has ? '✓' : ''}</button></div>`;
 }
 
 function pokupki() {
@@ -776,6 +797,10 @@ function render() {
     kultury, kultura: () => kultura(a), eshche, pokupki, chto: () => chto(a), priznak: () => priznak(a),
     dnevnik, zapis: () => zapis(a), kopiya };
   view.innerHTML = (pages[page || ''] || home)();
+  // в шапке главной — сегодняшняя дата
+  const t = today();
+  const wd = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'][t.getDay()];
+  document.getElementById('sub').textContent = page ? '' : `${wd}, ${fmt(t)} · Февральск`;
   bindChecks();
   view.querySelectorAll('[data-have]').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.have;
@@ -801,8 +826,8 @@ async function start() {
   D.crops = Object.fromEntries(D.cropsList.map(c => [c.id, c]));
   // культуры-«служебные» для дел календаря
   Object.assign(D.crops, {
-    teplitsa: { id: 'teplitsa', 'название': 'Теплица' }, rassada: { id: 'rassada', 'название': 'Рассада' },
-    zelen: { id: 'zelen', 'название': 'Зелень' }, 'зелень': { id: 'zelen', 'название': 'зелень' },
+    teplitsa: { id: 'teplitsa', 'название': 'Теплица', 'значок': '🏡' }, rassada: { id: 'rassada', 'название': 'Рассада', 'значок': '🌱' },
+    zelen: { id: 'zelen', 'название': 'Зелень', 'значок': '🌿' }, 'зелень': { id: 'zelen', 'название': 'зелень', 'значок': '🌿' },
   });
   window.addEventListener('hashchange', render);
   render();

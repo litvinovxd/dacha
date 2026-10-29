@@ -1,117 +1,148 @@
-/* Крупный шрифт и высокий контраст — для удобства на телефоне */
+/* Внешний вид в духе Material Design 3 (как приложения Android).
+   Крупный шрифт (основной текст 20px, кнопки от 48px) и высокий контраст — для удобства на телефоне. */
 :root {
-  --text: #111;
-  --muted: #444;
-  --bg: #fff;
-  --card: #f3f1ec;
-  --accent: #2e6b30;
-  --accent-light: #e3efe0;
-  --warn: #9a3412;
-  --warn-bg: #fdecc8;
-  --line: #c9c4b8;
+  --primary: #386a20;          /* основной зелёный */
+  --on-primary: #fff;
+  --pc: #b8f397;               /* светло-зелёный (выделение, значки) */
+  --on-pc: #042100;
+  --surface: #f8faf0;          /* фон */
+  --sc: #eef0e6;               /* карточки */
+  --sch: #e2e4da;              /* разделители, поля */
+  --text: #1a1c16;
+  --muted: #44483d;
+  --outline: #74796c;
+  --error: #ba1a1a;
+  --ec: #ffdad6;               /* красная карточка (заморозок, жара) */
+  --on-ec: #410002;
+  --wc: #ffe7b8;               /* жёлтая карточка (пора было, мягкие подсказки) */
+  --on-wc: #3d2a00;
+  --tc: #bcebf0;               /* голубая (покупки, погода) */
+  --on-tc: #002023;
+  --line: var(--sch);
+  /* старые имена — для мест, которые ещё ими пользуются */
+  --accent: var(--primary); --card: var(--sc); --accent-light: var(--pc);
 }
 
 * { box-sizing: border-box; }
-
 html { font-size: 20px; }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
   color: var(--text);
-  background: var(--bg);
+  background: var(--surface);
   line-height: 1.45;
-  padding-bottom: 84px; /* место под нижнее меню */
+  padding-bottom: 96px; /* место под нижнее меню */
 }
 
-.top {
-  background: var(--accent);
-  color: #fff;
-  padding: 12px 16px;
-}
-.top h1 { margin: 0; font-size: 1.25rem; }
+/* Шапка */
+.top { padding: 14px 16px 2px; max-width: 640px; margin: 0 auto; }
+.top h1 { margin: 0; font-size: 1.3rem; font-weight: 500; }
+.top .sub { color: var(--muted); font-size: 0.8rem; }
 
-main { padding: 12px 16px; max-width: 640px; margin: 0 auto; }
+main { padding: 6px 16px 90px; max-width: 640px; margin: 0 auto; }  /* снизу — запас под кнопку «В дневник» */
 
-h2 { font-size: 1.2rem; margin: 18px 0 10px; }
-h3 { font-size: 1.05rem; margin: 14px 0 6px; }
+h2 { font-size: 1rem; font-weight: 600; color: var(--primary); margin: 22px 4px 8px; letter-spacing: .01em; }
+h3 { font-size: 1rem; font-weight: 600; margin: 16px 4px 6px; }
 p { margin: 8px 0; }
-a { color: var(--accent); }
+a { color: var(--primary); }
 
-/* Нижнее меню */
+/* Нижнее меню — с «таблеткой» под активным разделом */
 .tabs {
-  position: fixed; left: 0; right: 0; bottom: 0;
-  display: flex; background: #fff; border-top: 2px solid var(--line);
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  display: flex; background: var(--sc); padding: 8px 0 calc(10px + env(safe-area-inset-bottom));
 }
 .tabs a {
-  flex: 1; min-height: 64px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  font-size: 0.7rem; color: var(--muted); text-decoration: none;
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 0.68rem; font-weight: 500; color: var(--muted); text-decoration: none;
   min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
-.tabs a.active { color: var(--accent); font-weight: 700; background: var(--accent-light); }
-.tabs .ico { font-size: 1.3rem; line-height: 1.1; }
+.tabs .ico { display: block; width: 56px; height: 32px; line-height: 32px; text-align: center; border-radius: 16px; font-size: 1.2rem; }
+.tabs a.active { color: var(--text); font-weight: 700; }
+.tabs a.active .ico { background: var(--pc); }
 
-/* Список дел */
+/* Список дел: значок — текст — галочка */
 .task {
-  display: flex; align-items: center; gap: 12px;
-  background: var(--card); border-radius: 12px;
-  padding: 10px 12px; margin: 8px 0; min-height: 64px;
+  display: flex; align-items: center; gap: 14px;
+  background: var(--sc); border-radius: 16px;
+  padding: 12px 14px; margin: 8px 0; min-height: 72px;
   text-decoration: none; color: var(--text);
 }
+.task .lead { flex: none; width: 44px; height: 44px; border-radius: 12px; background: var(--pc);
+  display: flex; align-items: center; justify-content: center; font-size: 1.35rem; }
+.task .txt { flex: 1; min-width: 0; color: inherit; text-decoration: none; }
 .task .when { font-size: 0.8rem; color: var(--muted); }
-.task.late { background: var(--warn-bg); }
-.task.late .when { color: var(--warn); font-weight: 600; }
-.task.done { opacity: 0.55; }
-.task .txt { flex: 1; }
+.task.late { background: var(--wc); color: var(--on-wc); }
+.task.late .lead { background: #fff3d6; }
+.task.late .when { color: #7a4f00; font-weight: 600; }
+.task.done .txt > div:first-child { text-decoration: line-through; color: var(--muted); }
 .check {
-  flex: none; width: 48px; height: 48px; border-radius: 10px;
-  border: 3px solid var(--accent); background: #fff;
-  font-size: 1.6rem; line-height: 1; color: var(--accent); cursor: pointer;
+  flex: none; width: 48px; height: 48px; margin: 0; padding: 0; border-radius: 12px;
+  border: 3px solid var(--outline); background: #fff; line-height: 1;
+  font-size: 1.4rem; font-weight: 700; color: var(--on-primary); cursor: pointer;
 }
-.check.on { background: var(--accent); color: #fff; }
+.check.on { background: var(--primary); border-color: var(--primary); }
 
+/* Кнопки: залитая (главное действие) и тональная (второстепенное) */
 button, .btn {
   display: block; width: 100%; min-height: 56px; margin: 10px 0;
-  font-size: 1rem; font-weight: 600; border-radius: 12px; cursor: pointer;
-  border: 2px solid var(--accent); background: var(--accent); color: #fff;
-  text-align: center; text-decoration: none; line-height: 52px; padding: 0 12px;
+  font-size: 1rem; font-weight: 600; font-family: inherit; border-radius: 28px; cursor: pointer;
+  border: 0; background: var(--primary); color: var(--on-primary);
+  text-align: center; text-decoration: none; line-height: 56px; padding: 0 20px;
 }
-button.second, .btn.second { background: #fff; color: var(--accent); }
-input[type=date], .big { font-size: 1rem; min-height: 52px; width: 100%; padding: 6px; margin-top: 4px;
-  border: 2px solid var(--line); border-radius: 8px; background: #fff; color: var(--text); font-family: inherit; }
+button.second, .btn.second { background: var(--pc); color: var(--on-pc); }
+button:active, .btn:active { filter: brightness(.92); }
 
-.card { background: var(--card); border-radius: 12px; padding: 12px; margin: 10px 0; }
+input[type=date], input[type=number], .big {
+  font-size: 1rem; min-height: 56px; width: 100%; padding: 8px 12px; margin-top: 6px;
+  border: 2px solid var(--outline); border-radius: 12px; background: #fff; color: var(--text); font-family: inherit;
+}
+textarea.big { line-height: 1.4; }
+
+.card { background: var(--sc); border-radius: 16px; padding: 14px 16px; margin: 10px 0; }
+label.card { display: block; }
 .note { color: var(--muted); font-size: 0.85rem; }
 .empty { color: var(--muted); }
 
+/* Плашка-ссылка (например «Пора купить») */
+.chip { display: inline-flex; align-items: center; gap: 8px; margin: 14px 0 4px; padding: 0 20px; min-height: 48px;
+  border-radius: 24px; background: var(--tc); color: var(--on-tc); font-weight: 600; text-decoration: none; }
+
+/* Плавающая кнопка «В дневник» */
+.fab { position: fixed; right: 16px; bottom: calc(96px + env(safe-area-inset-bottom)); z-index: 4;
+  display: flex; align-items: center; gap: 8px; min-height: 56px; padding: 0 20px; border-radius: 16px;
+  background: var(--pc); color: var(--on-pc); font-weight: 600; text-decoration: none; box-shadow: 0 3px 8px rgba(0,0,0,.22); }
+
 /* Календарь */
-.month { margin: 16px 0; }
-.month h2 { border-bottom: 2px solid var(--line); padding-bottom: 4px; }
+.month { margin: 8px 0; }
 
 /* Схема участка */
-.map { width: 100%; height: auto; background: #f4f1ea; border-radius: 12px; touch-action: manipulation; }
+.map { width: 100%; height: auto; border-radius: 16px; touch-action: manipulation; display: block; }
 .map .zone { cursor: pointer; }
-.zlist a { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 10px; margin: 6px 0;
-  background: var(--card); border-radius: 10px; color: var(--text); text-decoration: none; }
-.zlist .num { flex: none; width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 2px solid #333;
+.zlist a { display: flex; align-items: center; gap: 14px; min-height: 56px; padding: 8px 14px; margin: 6px 0;
+  background: var(--sc); border-radius: 16px; color: var(--text); text-decoration: none; }
+.zlist .num { flex: none; width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 2px solid rgba(0,0,0,.35);
   display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
-.legend span { display: inline-block; margin-right: 12px; font-size: 0.8rem; }
-.legend i { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: middle; margin-right: 4px; border: 1px solid #333; }
 
-/* Погода */
-.alert { background: #fde2e2; border-left: 6px solid #b91c1c; border-radius: 8px; padding: 10px 12px; margin: 8px 0; font-weight: 600; }
-.alert.soft { background: var(--warn-bg); border-left-color: var(--warn); font-weight: 400; }
-.wx { background: var(--card); border-radius: 12px; padding: 4px 12px; }
-.wxrow { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
-.wxrow:last-child { border-bottom: 0; }
-.wxrow b { flex: none; width: 5.2em; }
+/* Погода: предупреждения и прогноз плитками */
+.alert { display: flex; gap: 14px; background: var(--ec); color: var(--on-ec); border-radius: 16px; padding: 14px 16px; margin: 8px 0; }
+.alert .ai { font-size: 1.5rem; line-height: 1.3; }
+.alert b { display: block; }
+.alert.soft { background: var(--wc); color: var(--on-wc); }
+.wx { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; }
+.day { flex: 0 0 84px; scroll-snap-align: start; background: var(--sc); border-radius: 16px; padding: 10px 4px; text-align: center; }
+.day.warn { background: var(--ec); color: var(--on-ec); }
+.day .d { font-size: 0.75rem; opacity: .85; }
+.day .e { font-size: 1.6rem; line-height: 1.3; }
+.day .x { font-weight: 600; }
+.day .n { font-size: 0.78rem; opacity: .85; }
+.day .r { font-size: 0.7rem; color: #1f5f9c; }
 
 /* Ряд кнопок: при крупном шрифте переносится на новую строку */
-.row { display: flex; flex-wrap: wrap; gap: 6px; }
-.row > * { flex: 1 1 96px; min-width: 0; width: auto; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.row > * { flex: 1 1 96px; min-width: 0; width: auto; margin: 4px 0; }
 
 .card ul { margin: 6px 0 0; padding-left: 22px; }
 .card li { margin: 4px 0; }
 
-.back { display: inline-block; min-height: 48px; line-height: 48px; font-size: 1rem; text-decoration: none; }
+.back { display: inline-flex; align-items: center; min-height: 48px; font-size: 1rem; font-weight: 500; text-decoration: none; }
