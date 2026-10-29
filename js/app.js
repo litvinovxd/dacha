@@ -144,6 +144,7 @@ function moonBlock() {
 // --- Погода ---
 const WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
 let forecast = load('dacha.forecast', null);   // { got: ISO-время, daily: {...} }
+if (forecast && !(forecast.daily && forecast.daily.time)) forecast = null;   // испорченный сохранённый прогноз
 
 function weatherCfg() {
   const own = load('dacha.weatherCfg', {});  // пороги, поменянные в настройках
@@ -156,6 +157,7 @@ async function loadForecast() {
   try {
     const r = await fetch(D.weather['прогноз_api']);
     const j = await r.json();
+    if (!j.daily || !j.daily.time) return;   // сервис ответил ошибкой (например, слишком много запросов) — оставим прежний прогноз
     forecast = { got: new Date().toISOString(), daily: j.daily };
     save('dacha.forecast', forecast);
     if (!location.hash || location.hash === '#/') render();
@@ -164,7 +166,7 @@ async function loadForecast() {
 
 // Предупреждения — наверху главной, таблица прогноза — внизу
 function weatherAlerts() {
-  if (!forecast) return '';
+  if (!forecast || !forecast.daily) return '';
   return Weather.hints(forecast.daily, weatherCfg(), iso(today())).map(x => {
     const [icon, title] = ALERT_LOOK[x['вид']] || ['⚠️', 'Внимание'];
     return `<div class="alert${x['важно'] ? '' : ' soft'}"><span class="ai">${icon}</span><div><b>${title}</b>${esc(x['текст'])}</div></div>`;
@@ -183,7 +185,7 @@ function skyIcon(code) {
 }
 
 function weatherBlock() {
-  if (!forecast) return `<p class="note">Прогноз погоды загружается…</p>`;
+  if (!forecast || !forecast.daily) return `<p class="note">Прогноз погоды загружается…</p>`;
   const d = forecast.daily, t = iso(today());
   let h = '';
   const i0 = Math.max(0, d.time.indexOf(t));

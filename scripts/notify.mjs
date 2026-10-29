@@ -40,6 +40,7 @@ async function main() {
   } else {
     const r = await fetch(cfg['прогноз_api']);
     const { daily } = await r.json();
+    if (!daily || !daily.time) { console.log('Прогноз не получен (ошибка сервиса погоды) — сегодня без уведомления.'); return; }
     const important = Weather.hints(daily, cfg, localToday()).filter(h => h['важно']);
     console.log('Подсказки:', important.map(h => h['текст']));
     if (!important.length) { console.log('Ничего важного — молчим.'); return; }
