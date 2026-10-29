@@ -80,7 +80,8 @@ function instance(task, year) {
 function allInstances(years) {
   const out = [];
   for (const y of years) for (const t of D.calendar['дела']) {
-    if (!t['с_года'] || y >= t['с_года']) out.push(instance(t, y)); // например, малина появится только в 2027
+    // «с_года» — например, малина появится только в 2027; «до_года» — разовые дела вроде переноса теплицы
+    if ((!t['с_года'] || y >= t['с_года']) && (!t['до_года'] || y <= t['до_года'])) out.push(instance(t, y));
   }
   return out;
 }
