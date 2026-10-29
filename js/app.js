@@ -705,13 +705,16 @@ function zoneName(id) { const z = D.zones['зоны'].find(q => q.id === id); re
 function cropName(id) { return D.crops[id] ? D.crops[id]['название'] : ''; }
 
 function dnevnik() {
-  let h = `<h2>Дневник</h2><div class="row">` +
-    Object.entries(KINDS).map(([k, t]) => `<a class="btn" style="font-size:0.85rem;padding:0 4px" href="#/zapis/${k}">${t}</a>`).join('') + `</div>`;
+  let h = `<h2>Дневник</h2>
+    <p class="note">Записывайте, что и где посадили и сколько собрали. По этим записям на следующий год приложение подскажет, что куда сажать.</p>
+    <div class="kinds">` +
+    Object.entries(KINDS).map(([k, t]) => { const [ic, ...w] = t.split(' ');
+      return `<a href="#/zapis/${k}"><span class="ki">${ic}</span>${w.join(' ')}</a>`; }).join('') + `</div>`;
   const last = load('dacha.backupAt', null);
   if (diary.length && (!last || Date.now() - new Date(last).getTime() > BACKUP_DAYS * DAY)) {
-    h += `<div class="alert soft">Давно не отправляли копию дневника Роме. <a href="#/kopiya">Отправить копию</a></div>`;
+    h += `<div class="alert soft"><span class="ai">💾</span><div>Давно не сохраняли копию дневника. <a href="#/kopiya">Сохранить копию</a></div></div>`;
   }
-  if (!diary.length) h += `<p class="empty">Пока записей нет. Отмечайте, что и где посадили и сколько собрали — по этим записям на следующий год составится план посадок.</p>`;
+  if (!diary.length) h += `<p class="empty">Пока записей нет.</p>`;
   const sorted = [...diary].sort((a, b) => b['дата'].localeCompare(a['дата']));
   h += sorted.map(e => `<div class="card"><b>${KINDS[e['вид']]}</b> · ${fmt(parse(e['дата']))} ${parse(e['дата']).getFullYear()}
     <br>${[cropName(e['культура']), e['сорт'], zoneName(e['зона'])].filter(Boolean).map(esc).join(' · ')}
@@ -719,7 +722,7 @@ function dnevnik() {
     ${e['заметка'] ? `<p>${esc(e['заметка'])}</p>` : ''}
     ${e['фото'] ? `<img data-photo="${e.id}" alt="фото" style="width:100%;border-radius:8px;margin-top:6px">` : ''}
     <button class="second" data-del="${e.id}" style="min-height:48px;line-height:44px">Удалить запись</button></div>`).join('');
-  h += `<a class="btn second" href="#/kopiya">📤 Копия для Ромы</a>`;
+  h += `<a class="btn second" href="#/kopiya">💾 Сохранить копию</a>`;
   return h;
 }
 
@@ -784,12 +787,12 @@ function backupData() {
 }
 
 function kopiya() {
-  return `<a class="back" href="#/dnevnik">← Дневник</a><h2>Копия для Ромы</h2>
-    <p>Копия дневника и всех отметок («сделано», «уже есть»). Фото в копию не входят.</p>
-    <button id="bkSend">📤 Отправить копию Роме</button>
-    <p class="note">Откроется выбор: WhatsApp → Рома.</p>
-    <h3>Загрузить копию</h3>
-    <p class="note">Для Ромы: выберите файл копии от мамы — записи добавятся к этому телефону.</p>
+  return `<a class="back" href="#/dnevnik">← Дневник</a><h2>Сохранить копию</h2>
+    <p>Всё, что вы отметили в приложении (дневник, «сделано», покупки), хранится в этом телефоне. Копия нужна, чтобы ничего не пропало, если телефон сломается или поменяется.</p>
+    <button id="bkSend">💾 Сохранить копию</button>
+    <p class="note">Откроется выбор, куда отправить файл: например, в WhatsApp Роме. Фото в копию не входят.</p>
+    <h3>Восстановить из копии</h3>
+    <p class="note">Если телефон новый: выберите файл копии — записи вернутся.</p>
     <input type="file" id="bkLoad" accept=".json,application/json">`;
 }
 
