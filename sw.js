@@ -1,7 +1,7 @@
 // Сервис-воркер: приложение работает без интернета и получает push-уведомления.
 // Свои файлы — «сначала сеть, если нет — из памяти телефона»: так обновления приходят сразу,
 // а без интернета открывается последняя версия. Прогноз погоды не кэшируется (его хранит само приложение).
-const CACHE = 'dacha-v4';
+const CACHE = 'dacha-v5';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css', 'js/app.js', 'js/weather.js', 'js/moon.js',
   'img/icon-192.png', 'img/icon-512.png',
@@ -22,7 +22,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;  // погода и чужие сайты — напрямую
-  e.respondWith(fetch(e.request)
+  // cache: 'no-cache' — всегда сверяться с сайтом (иначе браузер ~10 минут отдаёт старые файлы GitHub)
+  e.respondWith(fetch(e.request, { cache: 'no-cache' })
     .then(r => {
       const copy = r.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy));

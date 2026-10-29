@@ -993,9 +993,14 @@ function render() {
 }
 
 async function start() {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator) {
+    // когда на сайте новая версия — новый сервис-воркер берёт управление, и страница один раз перезагружается
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) location.reload(); });
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
+  }
   const files = ['calendar', 'crops', 'varieties', 'zones', 'plan', 'cards', 'shopping', 'symptoms', 'weather', 'push', 'layouts'];
-  const got = await Promise.all(files.map(f => fetch(`data/${f}.json`).then(r => r.json())));
+  const got = await Promise.all(files.map(f => fetch(`data/${f}.json`, { cache: 'no-cache' }).then(r => r.json())));
   files.forEach((f, n) => { D[f] = got[n]; });
   D.tasks = Object.fromEntries(D.calendar['дела'].map(t => [t.id, t]));
   D.cropsList = D.crops['культуры'];
